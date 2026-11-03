@@ -1,0 +1,9 @@
+# Salesforce Code Analyzer settings for the security scans. The scans cover what the
+# package ships: Jest tests are excluded from the package by .forceignore, so
+# they are excluded here too.
+ignores:
+  files:
+    - "**/__tests__/**"
+    - "**/node_modules/**"
+    - "test/**"
+    - "scripts/**"

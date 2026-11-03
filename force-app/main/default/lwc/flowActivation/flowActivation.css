@@ -1,0 +1,151 @@
+@import "c/flowTokens";
+
+:host {
+  display: block;
+}
+
+.governance {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Governance modes: the stricter, the deeper the river. */
+.mode-owner {
+  background: var(--fc-river-90);
+  color: var(--fc-river-30);
+}
+.mode-approval {
+  background: var(--fc-deep);
+  color: var(--fc-cream);
+}
+
+.checks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--fc-ink-30);
+}
+
+.checks-off {
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.25rem;
+  background: var(--fc-gold-95);
+  color: var(--fc-gold-30);
+}
+
+.checks-link {
+  font-size: inherit;
+  text-decoration: underline;
+}
+
+.pending {
+  margin: 0 0 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.pending li {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.note {
+  color: var(--fc-ink-40);
+}
+
+.current {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: 0.5rem;
+  color: var(--fc-ink-30);
+}
+
+.dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--fc-ink-80);
+}
+
+.current-this .dot {
+  background: var(--fc-canopy-50);
+  box-shadow: 0 0 0 3px var(--fc-canopy-95);
+}
+
+.actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  min-height: 2rem;
+}
+
+.error {
+  padding: 0.375rem 0.5rem;
+  margin-bottom: 0.5rem;
+  border-radius: 0.25rem;
+  background: var(--fc-macaw-95);
+  color: var(--fc-macaw-30);
+}
+
+.outcome {
+  margin-top: 0.5rem;
+  font-weight: 600;
+  animation: rise var(--fc-dur) var(--fc-ease-out) backwards;
+}
+
+/* Unfolds under the button that asked for it. */
+.confirm {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--fc-ink-80);
+  border-left: 3px solid var(--fc-brand);
+  border-radius: 0.25rem;
+  background: var(--fc-ink-97);
+  animation: rise var(--fc-dur) var(--fc-ease-out) backwards;
+}
+
+.confirm-text {
+  font-weight: 600;
+  color: var(--fc-ink-10);
+}
+
+.confirm-detail {
+  margin-top: 0.25rem;
+  color: var(--fc-ink-30);
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .outcome,
+  .confirm {
+    animation: none;
+  }
+}
+.outcome.ok {
+  color: var(--fc-canopy-30);
+}
+.outcome.failed {
+  color: var(--fc-macaw-30);
+}

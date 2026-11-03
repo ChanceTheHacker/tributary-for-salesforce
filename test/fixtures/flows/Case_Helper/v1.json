@@ -1,0 +1,132 @@
+{
+  "FullName": "Case_Helper",
+  "Metadata": {
+    "label": "Case Helper",
+    "processType": "AutoLaunchedFlow",
+    "processMetadataValues": [
+      {
+        "name": "CanvasMode",
+        "value": {
+          "stringValue": "FREE_FORM_CANVAS"
+        }
+      }
+    ],
+    "start": {
+      "locationX": 0,
+      "locationY": 0,
+      "connector": {
+        "targetReference": "Get_Case"
+      }
+    },
+    "recordLookups": [
+      {
+        "name": "Get_Case",
+        "label": "Get Case",
+        "locationX": 0,
+        "locationY": 100,
+        "object": "Case",
+        "getFirstRecordOnly": true,
+        "storeOutputAutomatically": true,
+        "filterLogic": "and",
+        "filters": [
+          {
+            "field": "Id",
+            "operator": "EqualTo",
+            "value": {
+              "elementReference": "recordId"
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Route"
+        }
+      }
+    ],
+    "decisions": [
+      {
+        "name": "Route",
+        "label": "Route",
+        "locationX": 0,
+        "locationY": 200,
+        "rules": [
+          {
+            "name": "High",
+            "label": "High",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "Get_Case.Priority",
+                "operator": "EqualTo",
+                "rightValue": {
+                  "stringValue": "High"
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Set_Note"
+            }
+          }
+        ]
+      }
+    ],
+    "assignments": [
+      {
+        "name": "Set_Note",
+        "label": "Set Note",
+        "locationX": 0,
+        "locationY": 300,
+        "assignmentItems": [
+          {
+            "assignToReference": "note",
+            "operator": "Assign",
+            "value": {
+              "stringValue": "Case {!Get_Case.CaseNumber} is high"
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Escalate"
+        }
+      }
+    ],
+    "recordUpdates": [
+      {
+        "name": "Escalate",
+        "label": "Escalate",
+        "locationX": 0,
+        "locationY": 400,
+        "inputReference": "Get_Case",
+        "inputAssignments": [
+          {
+            "field": "IsEscalated",
+            "value": {
+              "booleanValue": true
+            }
+          },
+          {
+            "field": "Description",
+            "value": {
+              "elementReference": "note"
+            }
+          }
+        ]
+      }
+    ],
+    "variables": [
+      {
+        "name": "recordId",
+        "dataType": "String",
+        "isCollection": false,
+        "isInput": true,
+        "isOutput": false
+      },
+      {
+        "name": "note",
+        "dataType": "String",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": false
+      }
+    ]
+  }
+}

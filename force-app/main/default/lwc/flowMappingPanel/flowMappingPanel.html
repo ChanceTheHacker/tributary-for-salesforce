@@ -1,0 +1,122 @@
+<template>
+  <section class="panel">
+    <p class="intro">{intro}</p>
+    <p role="status">{message}</p>
+
+    <template lwc:if={hasRoots}>
+      <h3 class="section">Map what it uses</h3>
+      <ul class="roots">
+        <template for:each={rootRows} for:item="row">
+          <li key={row.key} class={row.className} data-key={row.key}>
+            <div class="root-head">
+              <span class="root-name">{row.name}</span>
+              <span class="root-type">{row.typeLabel}</span>
+            </div>
+            <p class="root-detail">{row.kind} · {row.usedBy}</p>
+            <lightning-combobox
+              class="root-pick"
+              label={row.pickLabel}
+              variant="label-hidden"
+              options={row.options}
+              value={row.value}
+              data-key={row.key}
+              onchange={handleRoot}
+            ></lightning-combobox>
+            <template lwc:if={row.why}>
+              <p class="root-detail root-why">{row.why}</p>
+            </template>
+            <template lwc:if={row.confirm}>
+              <lightning-button
+                class="root-keep"
+                variant="neutral"
+                label="Keep this mapping"
+                title={row.confirmLabel}
+                data-key={row.key}
+                onclick={handleKeep}
+              ></lightning-button>
+            </template>
+            <template lwc:if={row.noMatch}>
+              <p class="root-note">
+                Nothing in this flow holds the same kind of value.
+              </p>
+            </template>
+            <template lwc:if={row.creating}>
+              <lightning-input
+                class="root-name-input"
+                label="Name"
+                value={row.createName}
+                max-length="80"
+                data-key={row.key}
+                onchange={handleName}
+              ></lightning-input>
+              <template lwc:if={row.nameError}>
+                <p class="root-error">{row.nameError}</p>
+              </template>
+            </template>
+            <template for:each={row.problems} for:item="problem">
+              <p key={problem.key} class={problem.className}>{problem.text}</p>
+            </template>
+          </li>
+        </template>
+      </ul>
+    </template>
+
+    <template lwc:if={hasElements}>
+      <h3 class="section">In both flows</h3>
+      <ul class="elements">
+        <template for:each={elementRows} for:item="row">
+          <li key={row.key} class="element">
+            <span class="element-text">
+              <span class="element-name" title={row.apiName}>{row.name}</span>
+              <span class="root-detail">{row.detail}</span>
+            </span>
+            <lightning-radio-group
+              class="element-pick"
+              name={row.key}
+              label={row.pickLabel}
+              variant="label-hidden"
+              type="button"
+              options={elementOptions}
+              value={row.value}
+              data-key={row.key}
+              onchange={handleElement}
+            ></lightning-radio-group>
+          </li>
+        </template>
+      </ul>
+    </template>
+
+    <ul class="notes">
+      <template for:each={noteLines} for:item="line">
+        <li key={line.key}>{line.text}</li>
+      </template>
+    </ul>
+    <template lwc:if={startNote}>
+      <p class="start-note">{startNote}</p>
+    </template>
+    <lightning-button
+      class="reset"
+      variant="base"
+      label="Back to the suggestions"
+      onclick={handleReset}
+    ></lightning-button>
+
+    <template lwc:if={canPlace}>
+      <h3 class="section">Put it on a path</h3>
+      <c-flow-place
+        model={placeModel}
+        merge={merge}
+        resolved={resolved}
+        picks={picks}
+        keys={placeExclude}
+        side="after"
+        first={notes.entry}
+        exclude={placeExclude}
+        label={placeLabel}
+        button-label="Put it here"
+        hint={placeHint}
+        onplace={handlePlace}
+      ></c-flow-place>
+    </template>
+  </section>
+</template>

@@ -1,0 +1,77 @@
+<template>
+  <div class="place">
+    <c-flow-picker
+      class="place-element"
+      label={label}
+      placeholder="Choose an element"
+      noun="elements"
+      options={elementOptions}
+      value={afterKey}
+      onchange={handleElement}
+    ></c-flow-picker>
+    <lightning-combobox
+      class="place-slot"
+      label="On its path"
+      placeholder="Choose a path"
+      options={slotOptions}
+      value={slot}
+      disabled={noSlots}
+      onchange={handleSlot}
+    ></lightning-combobox>
+    <template lwc:if={hint}>
+      <p class="hint">{hint}</p>
+    </template>
+    <template lwc:if={hasPlan}>
+      <div class="preview" aria-live="polite">
+        <p class="entry">{entryText}</p>
+        <template lwc:if={chooseEntry}>
+          <lightning-combobox
+            class="entry-pick"
+            label="Start their path at"
+            placeholder="Choose where it goes in"
+            options={entryOptions}
+            value={entryValue}
+            required
+            onchange={handleEntry}
+          ></lightning-combobox>
+        </template>
+        <ul class="exits">
+          <template for:each={exitRows} for:item="exit">
+            <li key={exit.id} class={exit.className} data-id={exit.id}>
+              <span class="exit-path">{exit.path}</span>
+              <template lwc:if={exit.choice}>
+                <lightning-combobox
+                  class="exit-pick"
+                  label={exit.path}
+                  variant="label-hidden"
+                  placeholder="Choose where it goes"
+                  options={exit.options}
+                  value={exit.value}
+                  required
+                  data-id={exit.id}
+                  onchange={handleRoute}
+                ></lightning-combobox>
+              </template>
+              <template lwc:else>
+                <span class="exit-text">{exit.text}</span>
+              </template>
+            </li>
+          </template>
+        </ul>
+        <template for:each={notes} for:item="note">
+          <p key={note.key} class={note.className}>{note.text}</p>
+        </template>
+        <template lwc:if={openText}>
+          <p class="note note-open">{openText}</p>
+        </template>
+      </div>
+    </template>
+    <lightning-button
+      class="place-button"
+      label={buttonLabel}
+      icon-name="utility:level_down"
+      disabled={placeDisabled}
+      onclick={handlePlace}
+    ></lightning-button>
+  </div>
+</template>

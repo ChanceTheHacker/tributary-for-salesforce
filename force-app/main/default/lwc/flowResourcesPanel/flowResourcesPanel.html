@@ -1,0 +1,119 @@
+<template>
+  <template lwc:if={hasDiff}>
+    <section class="panel">
+      <div class="bar">
+        <h3 class="section">Resources</h3>
+        <lightning-input
+          type="toggle"
+          label={toggleLabel}
+          checked={onlyChanges}
+          message-toggle-active=""
+          message-toggle-inactive=""
+          onchange={handleToggle}
+        ></lightning-input>
+      </div>
+      <template lwc:if={hasResources}>
+        <ul class="resources">
+          <template for:each={resources} for:item="resource">
+            <li key={resource.id}>
+              <button
+                class={resource.rowClass}
+                data-id={resource.id}
+                onclick={handleSelect}
+              >
+                <lightning-icon
+                  icon-name={resource.icon}
+                  size="x-small"
+                ></lightning-icon>
+                <span class="name">{resource.name}</span>
+                <span class="type">{resource.typeLabel}</span>
+                <span class="status">{resource.statusLabel}</span>
+              </button>
+            </li>
+          </template>
+        </ul>
+      </template>
+      <template lwc:else>
+        <p class="none">{noResourcesText}</p>
+      </template>
+
+      <h3 class="section">Flow properties</h3>
+      <template lwc:if={hasPropChanges}>
+        <table class="props">
+          <thead>
+            <tr>
+              <th scope="col">Property</th>
+              <th scope="col">{labels.before}</th>
+              <th scope="col">{labels.after}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template for:each={propChanges} for:item="change">
+              <tr key={change.id} class={change.rowClass}>
+                <th scope="row" title={change.rawPath}>{change.path}</th>
+                <td class="before">{change.before}</td>
+                <td class="after">{change.after}</td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </template>
+      <template for:each={propUnits} for:item="row">
+        <fieldset key={row.id} class={row.rowClass}>
+          <legend class="unit-label">
+            <span title={row.rawLabel}>{row.label}</span>
+            <template lwc:if={row.conflict}>
+              <span class="tag tag-conflict">Conflict</span>
+            </template>
+            <template lwc:if={row.resolvedConflict}>
+              <span class="tag tag-resolved">Resolved</span>
+            </template>
+          </legend>
+          <div class="cells">
+            <template for:each={row.cells} for:item="cell">
+              <label key={cell.key} class={cell.cellClass}>
+                <input
+                  type="radio"
+                  name={row.id}
+                  checked={cell.checked}
+                  data-unit={row.id}
+                  data-side={cell.side}
+                  onchange={handleRadio}
+                />
+                <span class="cell-side">{cell.label}</span>
+                <span class="value">{cell.text}</span>
+              </label>
+            </template>
+          </div>
+          <template lwc:if={row.editable}>
+            <details class="text-editor">
+              <summary>Combine or edit this text</summary>
+              <lightning-textarea
+                label={row.editLabel}
+                value={row.editValue}
+                data-unit={row.id}
+                onchange={handleTextChange}
+              ></lightning-textarea>
+              <lightning-button
+                label="Use edited text"
+                data-unit={row.id}
+                onclick={handleTextApply}
+              ></lightning-button>
+              <lightning-button
+                label="Combine both versions"
+                data-unit={row.id}
+                onclick={handleTextCombine}
+              ></lightning-button>
+            </details>
+            <template lwc:if={row.custom}>
+              <p class="custom-text">Using edited text: {row.customText}</p>
+            </template>
+          </template>
+        </fieldset>
+      </template>
+      <template lwc:if={noProps}>
+        <p class="none">No flow properties changed.</p>
+      </template>
+    </section>
+  </template>
+</template>

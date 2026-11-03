@@ -1,0 +1,12 @@
+Tributary
+Copyright (c) 2026 Sunwave Studio LLC. Released under the MIT licence (see LICENSE).
+
+This product displays icons from the Salesforce Lightning Design System
+(https://www.lightningdesignsystem.com), Copyright (c) Salesforce, Inc.
+The icons are licensed under the Creative Commons Attribution-NoDerivatives
+4.0 International License (https://creativecommons.org/licenses/by-nd/4.0/).
+They are rendered unmodified through the platform's lightning-icon component.
+No icon files are redistributed with this product.
+
+The flow canvas, layout, diff and merge engines are original work. They do
+not copy or derive from Salesforce Flow Builder's code, styles or assets.

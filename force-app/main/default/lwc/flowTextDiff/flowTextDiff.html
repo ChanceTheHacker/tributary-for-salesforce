@@ -1,0 +1,175 @@
+<template>
+  <div class="text-diff">
+    <div class="bar">
+      <lightning-radio-group
+        name="layout"
+        label="Layout"
+        variant="label-hidden"
+        type="button"
+        options={layoutOptions}
+        value={layout}
+        onchange={handleLayout}
+      ></lightning-radio-group>
+      <template lwc:if={ready}>
+        <span class="stat stat-added" title="Lines added">{stats.added}</span>
+        <span class="stat stat-removed" title="Lines removed"
+          >{stats.removed}</span
+        >
+      </template>
+      <span class="bar-actions">
+        <template lwc:if={canCollapse}>
+          <lightning-button
+            class="collapse"
+            variant="base"
+            label="Collapse unchanged lines"
+            onclick={handleCollapse}
+          ></lightning-button>
+        </template>
+        <template lwc:if={folded}>
+          <lightning-button
+            class="show-all"
+            variant="base"
+            label="Show every line"
+            onclick={handleShowAll}
+          ></lightning-button>
+        </template>
+      </span>
+    </div>
+    <template lwc:if={ready}>
+      <template lwc:if={identical}>
+        <p class="identical">The two flows produce identical XML.</p>
+      </template>
+      <div
+        class="code"
+        role="region"
+        aria-label="Flow XML differences"
+        tabindex="0"
+        lwc:ref="code"
+      >
+        <template lwc:if={isSplit}>
+          <div class="split-head" aria-hidden="true">
+            <span>{beforeLabel}</span>
+            <span>{afterLabel}</span>
+          </div>
+        </template>
+        <template for:each={view.hunks} for:item="hunk">
+          <div key={hunk.key} class="hunk">
+            <template lwc:if={hunk.skipped}>
+              <button
+                class="skipped"
+                data-from={hunk.gapFrom}
+                data-to={hunk.gapTo}
+                onclick={expand}
+              >
+                <lightning-icon
+                  icon-name="utility:expand_alt"
+                  size="xx-small"
+                  class="skipped-icon"
+                ></lightning-icon>
+                Show {hunk.skippedText}
+              </button>
+            </template>
+            <div class="hunk-header">
+              <span class="hunk-range">{hunk.header}</span>
+              <template lwc:if={hunk.element}>
+                <button
+                  class="inspect"
+                  data-element={hunk.element}
+                  title={hunk.inspectText}
+                  onclick={handleRowClick}
+                >
+                  {hunk.elementText}
+                </button>
+              </template>
+            </div>
+            <template lwc:if={isSplit}>
+              <template for:each={hunk.pairs} for:item="pair">
+                <div key={pair.key} class="pair">
+                  <div
+                    class={pair.left.className}
+                    data-element={pair.left.element}
+                    data-first={pair.left.first}
+                    onclick={handleRowClick}
+                  >
+                    <span class="no">{pair.left.no}</span>
+                    <span class="line"
+                      ><template lwc:if={pair.left.changeText}
+                        ><span class="slds-assistive-text"
+                          >{pair.left.changeText}:
+                        </span></template
+                      ><template for:each={pair.left.parts} for:item="part"
+                        ><span key={part.key} class={part.className}
+                          >{part.text}</span
+                        ></template
+                      ></span
+                    >
+                  </div>
+                  <div
+                    class={pair.right.className}
+                    data-element={pair.right.element}
+                    data-first={pair.right.first}
+                    onclick={handleRowClick}
+                  >
+                    <span class="no">{pair.right.no}</span>
+                    <span class="line"
+                      ><template lwc:if={pair.right.changeText}
+                        ><span class="slds-assistive-text"
+                          >{pair.right.changeText}:
+                        </span></template
+                      ><template for:each={pair.right.parts} for:item="part"
+                        ><span key={part.key} class={part.className}
+                          >{part.text}</span
+                        ></template
+                      ></span
+                    >
+                  </div>
+                </div>
+              </template>
+            </template>
+            <template lwc:else>
+              <template for:each={hunk.rows} for:item="row">
+                <div
+                  key={row.key}
+                  class={row.className}
+                  data-element={row.element}
+                  data-first={row.first}
+                  onclick={handleRowClick}
+                >
+                  <span class="no">{row.a}</span>
+                  <span class="no">{row.b}</span>
+                  <span class="sign" aria-hidden="true">{row.sign}</span>
+                  <span class="line"
+                    ><template lwc:if={row.changeText}
+                      ><span class="slds-assistive-text"
+                        >{row.changeText}:
+                      </span></template
+                    ><template for:each={row.parts} for:item="part"
+                      ><span key={part.key} class={part.className}
+                        >{part.text}</span
+                      ></template
+                    ></span
+                  >
+                </div>
+              </template>
+            </template>
+          </div>
+        </template>
+        <template lwc:if={view.skippedAfterText}>
+          <button
+            class="skipped"
+            data-from={view.afterFrom}
+            data-to={view.afterTo}
+            onclick={expand}
+          >
+            <lightning-icon
+              icon-name="utility:expand_alt"
+              size="xx-small"
+              class="skipped-icon"
+            ></lightning-icon>
+            Show {view.skippedAfterText}
+          </button>
+        </template>
+      </div>
+    </template>
+  </div>
+</template>

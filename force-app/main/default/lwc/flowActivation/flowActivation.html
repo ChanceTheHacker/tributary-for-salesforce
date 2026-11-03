@@ -1,0 +1,139 @@
+<template>
+  <div class="activation">
+    <template lwc:if={error}>
+      <div class="error" role="alert">{error}</div>
+    </template>
+    <template lwc:if={ready}>
+      <div class="governance">
+        <span class={badgeClass}>{badgeText}</span>
+        <template lwc:if={showGovernanceText}>
+          <span class="governance-text">{governanceText}</span>
+        </template>
+      </div>
+      <template lwc:if={checks}>
+        <p class={checksClass}>
+          <span class={checks.badgeClass}>{checks.state}</span>
+          <span class="checks-text">{checks.text}</span>
+          <template lwc:if={showChecksLink}>
+            <a class="checks-link" href={checksUrl} onclick={handleOpenChecks}
+              >Automatic check settings</a
+            >
+          </template>
+        </p>
+      </template>
+      <template lwc:if={hasPending}>
+        <ul class="pending">
+          <template for:each={pending} for:item="request">
+            <li key={request.id}>
+              <lightning-icon
+                icon-name="utility:clock"
+                size="x-small"
+                alternative-text="Pending"
+              ></lightning-icon>
+              {request.text}
+            </li>
+          </template>
+        </ul>
+      </template>
+      <template lwc:if={reviewWarning}>
+        <p class="note review-warning">
+          <strong>Review before activation:</strong> {reviewWarning}
+        </p>
+      </template>
+      <template lwc:if={isActive}>
+        <p class="current current-this">
+          <span class="dot" aria-hidden="true"></span>Version {versionNumber} is
+          the active version.
+        </p>
+      </template>
+      <template lwc:else>
+        <template lwc:if={knowsActive}>
+          <p class="current">
+            <span class="dot" aria-hidden="true"></span>{activeText}
+          </p>
+        </template>
+        <template lwc:if={overrides}>
+          <p class="note override-note">{overrideText}</p>
+        </template>
+        <template lwc:if={cannotAct}>
+          <p class="note">
+            You don't have permission to activate flows or request activation.
+          </p>
+        </template>
+        <template lwc:else>
+          <lightning-textarea
+            class="comments"
+            label="Comments (optional)"
+            placeholder="Why this version?"
+            value={comments}
+            max-length="4000"
+            onchange={handleComments}
+          ></lightning-textarea>
+          <div class="actions">
+            <template lwc:if={canRequest}>
+              <lightning-button
+                class="request"
+                variant={buttonVariant}
+                label={requestLabel}
+                disabled={requestDisabled}
+                onclick={handleRequest}
+              ></lightning-button>
+              <c-flow-help topic="request"></c-flow-help>
+            </template>
+            <template lwc:if={canActivate}>
+              <lightning-button
+                class="activate"
+                variant={activateVariant}
+                label={activateLabel}
+                disabled={activateDisabled}
+                onclick={handleActivate}
+              ></lightning-button>
+            </template>
+            <template lwc:if={busy}>
+              <lightning-spinner
+                size="small"
+                alternative-text="Working"
+              ></lightning-spinner>
+            </template>
+          </div>
+          <template lwc:if={busy}>
+            <p class="meta" role="status">
+              Waiting for the result. Queued activations may take time; closing
+              this page does not cancel them.
+            </p>
+          </template>
+          <template lwc:if={confirming}>
+            <div
+              class="confirm"
+              role="group"
+              aria-label="Confirm activation"
+              onkeydown={handleConfirmKeyDown}
+            >
+              <p class="confirm-text">{confirmText}</p>
+              <p class="confirm-detail">{confirmDetail}</p>
+              <template lwc:if={reviewWarning}>
+                <p class="note review-warning">{reviewWarning}</p>
+              </template>
+              <div class="confirm-actions">
+                <lightning-button
+                  class="confirm-cancel"
+                  label="Cancel"
+                  onclick={handleCancelConfirm}
+                ></lightning-button>
+                <lightning-button
+                  class="confirm-activate"
+                  variant="brand"
+                  label={confirmLabel}
+                  onclick={handleConfirm}
+                ></lightning-button>
+              </div>
+            </div>
+          </template>
+        </template>
+      </template>
+      <template lwc:if={outcome}>
+        <p class={outcomeClass} role="status">{outcome.text}</p>
+      </template>
+    </template>
+  </div>
+</template>

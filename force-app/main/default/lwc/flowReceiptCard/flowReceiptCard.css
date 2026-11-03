@@ -1,0 +1,76 @@
+@import "c/flowTokens";
+
+.receipt {
+  font-size: 0.8125rem;
+}
+
+.heading {
+  margin: 0.75rem 0 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--fc-ink-40);
+}
+
+.heading:first-child {
+  margin-top: 0;
+}
+
+.fingerprint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.5rem;
+}
+
+code {
+  padding: 0.0625rem 0.25rem;
+  border-radius: 0.25rem;
+  background: var(--fc-ink-95);
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+
+.aside {
+  color: var(--fc-ink-40);
+}
+
+.sources li,
+.decisions li {
+  margin-top: 0.125rem;
+}
+
+.sources li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.5rem;
+}
+
+.source-label,
+.check-title {
+  font-weight: 600;
+}
+
+.decisions {
+  padding-left: 1rem;
+  list-style: disc;
+}
+
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-top: 0.375rem;
+}
+
+.check lightning-icon {
+  flex: none;
+  margin-top: 0.125rem;
+}
+
+.messages {
+  margin-top: 0.125rem;
+  padding-left: 1rem;
+  list-style: disc;
+  overflow-wrap: anywhere;
+}

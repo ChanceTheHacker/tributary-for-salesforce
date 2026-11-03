@@ -1,0 +1,74 @@
+@import "c/flowTokens";
+
+:host {
+  display: block;
+}
+
+.search-icon {
+  pointer-events: none;
+  --slds-c-icon-color-foreground-default: var(--fc-ink-50);
+}
+
+.menu {
+  position: fixed;
+  z-index: 9500;
+  max-height: 16rem;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--fc-ink-90);
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 6px rgba(15, 42, 29, 0.16);
+  padding: 0.25rem 0;
+  animation: drop-in var(--fc-dur) var(--fc-ease-out) backwards;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  line-height: 1.3;
+}
+
+.option-label {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.option-active {
+  background: var(--fc-ink-95);
+}
+
+.option-chosen .option-label {
+  font-weight: 600;
+}
+
+.option-check {
+  --slds-c-icon-color-foreground-default: var(--fc-brand);
+}
+
+.more {
+  padding: 0.5rem 0.75rem;
+  color: var(--fc-ink-40);
+  cursor: pointer;
+}
+
+.empty {
+  padding: 0.5rem 0.75rem;
+  color: var(--fc-ink-40);
+}
+
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu {
+    animation: none;
+  }
+}

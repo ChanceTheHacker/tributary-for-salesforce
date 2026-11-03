@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Failed__c</fullName>
+    <description
+  >Flows a check couldn't check or keep to their approved version, including results that couldn't be saved.</description>
+    <label>Failed</label>
+    <precision>9</precision>
+    <scale>0</scale>
+    <type>Number</type>
+</CustomField>

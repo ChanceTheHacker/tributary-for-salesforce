@@ -1,0 +1,171 @@
+<template>
+  <template lwc:if={ready}>
+    <div class="diff-view">
+      <div class="toolbar">
+        <lightning-radio-group
+          class="mode"
+          name="mode"
+          label="View"
+          variant="label-hidden"
+          type="button"
+          options={modeOptions}
+          value={mode}
+          onchange={handleMode}
+        ></lightning-radio-group>
+        <div class="stepper">
+          <lightning-button-icon
+            icon-name="utility:chevronup"
+            alternative-text="Previous change"
+            title="Previous change"
+            disabled={noChanges}
+            onclick={handlePrevious}
+          ></lightning-button-icon>
+          <span class="position">{position}</span>
+          <lightning-button-icon
+            icon-name="utility:chevrondown"
+            alternative-text="Next change"
+            title="Next change"
+            disabled={noChanges}
+            onclick={handleNext}
+          ></lightning-button-icon>
+          <span class="slds-assistive-text" role="status">{announcement}</span>
+        </div>
+        <template lwc:if={wrapNotice}>
+          <span class="wrap-notice" aria-hidden="true">{wrapNotice}</span>
+        </template>
+        <template lwc:if={notText}>
+          <lightning-input
+            type="toggle"
+            label="Fade unchanged"
+            message-toggle-active=""
+            message-toggle-inactive=""
+            checked={dimUnchanged}
+            onchange={handleDim}
+          ></lightning-input>
+        </template>
+        <lightning-input
+          type="toggle"
+          label="Show moved"
+          message-toggle-active=""
+          message-toggle-inactive=""
+          checked={showMoved}
+          onchange={handleMoved}
+        ></lightning-input>
+        <button
+          class="resources-toggle slds-button slds-button_neutral"
+          type="button"
+          aria-expanded={sideOpen}
+          aria-controls="review-details"
+          onclick={handleResources}
+        >
+          {resourcesLabel}
+        </button>
+        <div class="summary">
+          <template for:each={pills} for:item="pill">
+            <span key={pill.key} class={pill.className}>{pill.text}</span>
+          </template>
+          <template lwc:if={notice}>
+            <span class="notice">{notice}</span>
+          </template>
+        </div>
+        <template lwc:if={notText}>
+          <div class="legend" aria-label="Canvas key">
+            <span>+ Added</span>
+            <span>− Removed</span>
+            <span>~ Changed</span>
+            <span>↔ Moved</span>
+          </div>
+        </template>
+      </div>
+
+      <div class="body" lwc:ref="body">
+        <div class="main">
+          <template lwc:if={isSplit}>
+            <div class="split">
+              <div class="pane">
+                <div class="pane-head">{beforeLabel}</div>
+                <c-flow-canvas
+                  class="canvas"
+                  scene={beforeScene}
+                  viewport={viewport}
+                  selected-id={selectedId}
+                  dim-unchanged={dimUnchanged}
+                  label={beforeCanvasLabel}
+                  onselect={handleCanvasSelect}
+                  onviewportchange={handleViewport}
+                ></c-flow-canvas>
+              </div>
+              <div class="pane">
+                <div class="pane-head">{afterLabel}</div>
+                <c-flow-canvas
+                  class="canvas"
+                  scene={afterScene}
+                  viewport={viewport}
+                  selected-id={selectedId}
+                  dim-unchanged={dimUnchanged}
+                  label={afterCanvasLabel}
+                  onselect={handleCanvasSelect}
+                  onviewportchange={handleViewport}
+                ></c-flow-canvas>
+              </div>
+            </div>
+          </template>
+          <template lwc:if={isUnified}>
+            <div class="pane single">
+              <div class="pane-head">{beforeLabel} → {afterLabel}</div>
+              <c-flow-canvas
+                class="canvas"
+                scene={unifiedScene}
+                viewport={viewport}
+                selected-id={selectedId}
+                dim-unchanged={dimUnchanged}
+                label="Combined flow canvas"
+                onselect={handleCanvasSelect}
+                onviewportchange={handleViewport}
+              ></c-flow-canvas>
+            </div>
+          </template>
+          <template lwc:if={isText}>
+            <div class="text">
+              <c-flow-text-diff
+                before={beforeMetadata}
+                after={afterMetadata}
+                labels={labels}
+                layout={textLayout}
+                focus-id={selectedId}
+                onselect={handleTextSelect}
+                onlayoutchange={handleTextLayout}
+              ></c-flow-text-diff>
+            </div>
+          </template>
+        </div>
+        <aside
+          class={sideClass}
+          id="review-details"
+          aria-label="Review details"
+        >
+          <template lwc:if={hasSelection}>
+            <c-flow-element-panel
+              entry={selectedEntry}
+              kind={selectedKind}
+              diff={diff}
+              labels={labels}
+              hide-text={isText}
+              onshowtext={handleShowText}
+              onclose={handleClose}
+            ></c-flow-element-panel>
+          </template>
+          <template lwc:else>
+            <c-flow-resources-panel
+              diff={diff}
+              labels={labels}
+              selected-id={selectedId}
+              selected-prop={selectedProp}
+              onselect={handleResourceSelect}
+            ></c-flow-resources-panel>
+          </template>
+        </aside>
+      </div>
+    </div>
+  </template>
+</template>

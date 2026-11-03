@@ -1,0 +1,56 @@
+<template>
+  <lightning-modal-header label={title}></lightning-modal-header>
+  <lightning-modal-body>
+    <div class="player">
+      <div class="stage">
+        <!-- The steps beside the video carry everything it shows; it has no sound. -->
+        <video
+          lwc:ref="video"
+          class="video"
+          src={topic.video}
+          controls
+          autoplay
+          muted
+          playsinline
+          preload="auto"
+          ontimeupdate={handleTime}
+        ></video>
+        <p class="caption" aria-hidden="true">
+          <span class="caption-step">{stepLabel}</span>
+          <span class="caption-text">{caption}</span>
+        </p>
+      </div>
+      <ol class="steps" aria-label="Steps">
+        <template for:each={steps} for:item="step">
+          <li key={step.key}>
+            <button
+              class={step.className}
+              aria-current={step.current}
+              data-index={step.index}
+              onclick={handleStep}
+            >
+              <span class="step-number" aria-hidden="true">{step.number}</span>
+              <span class="step-text">{step.text}</span>
+              <span class="step-time">{step.time}</span>
+            </button>
+          </li>
+        </template>
+      </ol>
+    </div>
+  </lightning-modal-body>
+  <lightning-modal-footer>
+    <div class="footer">
+      <lightning-button
+        class="turn-off"
+        variant="base"
+        label="Turn off help videos"
+        onclick={handleTurnOff}
+      ></lightning-button>
+      <lightning-button
+        class="close"
+        label="Close"
+        onclick={handleClose}
+      ></lightning-button>
+    </div>
+  </lightning-modal-footer>
+</template>

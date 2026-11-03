@@ -1,0 +1,504 @@
+<template>
+  <template lwc:if={ready}>
+    <div class="merge-view" onkeydown={handleViewKey}>
+      <div class="toolbar">
+        <lightning-radio-group
+          name="mergeMode"
+          label="Merge"
+          variant="label-hidden"
+          type="button"
+          options={modeOptions}
+          value={mode}
+          onchange={handleMode}
+        ></lightning-radio-group>
+        <template lwc:if={isCanvas}>
+          <lightning-button-menu
+            class="presets"
+            label={presetLabel}
+            alternative-text={presetLabel}
+            icon-name="utility:down"
+            menu-alignment="left"
+            onselect={handlePreset}
+          >
+            <template for:each={presets} for:item="preset">
+              <lightning-menu-item
+                key={preset.value}
+                value={preset.value}
+                label={preset.label}
+              ></lightning-menu-item>
+            </template>
+          </lightning-button-menu>
+          <div class="history">
+            <lightning-button-icon
+              class="undo"
+              icon-name="utility:undo"
+              alternative-text="Undo (Ctrl+Z)"
+              title="Undo (Ctrl+Z)"
+              disabled={cannotUndo}
+              onclick={handleUndo}
+            ></lightning-button-icon>
+            <lightning-button-icon
+              class="redo"
+              icon-name="utility:redo"
+              alternative-text="Redo (Ctrl+Shift+Z)"
+              title="Redo (Ctrl+Shift+Z)"
+              disabled={cannotRedo}
+              onclick={handleRedo}
+            ></lightning-button-icon>
+          </div>
+          <div class="stepper">
+            <lightning-button-icon
+              icon-name="utility:chevronup"
+              alternative-text={previousTitle}
+              title={previousTitle}
+              disabled={noSteps}
+              onclick={handlePrevious}
+            ></lightning-button-icon>
+            <span class="position">{position}</span>
+            <lightning-button-icon
+              icon-name="utility:chevrondown"
+              alternative-text={nextTitle}
+              title={nextTitle}
+              disabled={noSteps}
+              onclick={handleNext}
+            ></lightning-button-icon>
+            <span class="slds-assistive-text" role="status"
+              >{announcement}</span
+            >
+          </div>
+          <lightning-input
+            type="toggle"
+            label="Result only"
+            message-toggle-active=""
+            message-toggle-inactive=""
+            checked={resultOnly}
+            onchange={handleResultOnly}
+          ></lightning-input>
+        </template>
+        <div class="save-group">
+          <template lwc:if={saveNote}>
+            <span class="save-note">{saveNote}</span>
+          </template>
+          <lightning-button
+            class="download"
+            icon-name="utility:download"
+            label="Download draft"
+            title={downloadTitle}
+            disabled={downloadDisabled}
+            onclick={handleDownload}
+          ></lightning-button>
+          <lightning-button
+            class="save"
+            variant="brand"
+            icon-name="utility:save"
+            label={saveLabel}
+            title={saveTitle}
+            disabled={saveDisabled}
+            onclick={handleSave}
+          ></lightning-button>
+          <c-flow-help topic="save"></c-flow-help>
+        </div>
+      </div>
+
+      <div class="status" role="status">
+        <template for:each={statusChips} for:item="chip">
+          <span key={chip.key} class={chip.className}>{chip.text}</span>
+        </template>
+      </div>
+
+      <div class={canvasClass}>
+        <div class="legend" aria-label="Result canvas key">
+          <span title="Present in the result, absent from the comparison's base"
+            >+ Added to result</span
+          >
+          <span title="Present in the base, removed from the result"
+            >− Removed from result</span
+          >
+          <span title="Different from the base">~ Changed</span>
+          <span
+            title="Available from another version but not taken into the result"
+            >× Not taken</span
+          >
+        </div>
+        <div class="body" lwc:ref="body">
+          <div class="main">
+            <c-flow-canvas
+              class="canvas"
+              scene={scene}
+              selected-id={selectedId}
+              marked-ids={markedIds}
+              label="Merge canvas"
+              onselect={handleCanvasSelect}
+            ></c-flow-canvas>
+          </div>
+          <aside class="side">
+            <template lwc:if={showGroup}>
+              <c-flow-group-panel
+                merge={merge}
+                resolved={resolved}
+                picks={picks}
+                keys={marked}
+                labels={sideLabels}
+                onpick={handlePick}
+                onopen={handleGroupOpen}
+                onunmark={handleGroupUnmark}
+                onclear={handleGroupClear}
+              ></c-flow-group-panel>
+            </template>
+            <template lwc:elseif={hasSelection}>
+              <c-flow-element-panel
+                entry={selectedEntry}
+                kind={selectedKind}
+                diff={panelDiff}
+                labels={panelLabels}
+                merge={merge}
+                resolved={resolved}
+                picks={picks}
+                hide-text
+                next-label={panelNextLabel}
+                onnext={handleNext}
+                onpick={handlePick}
+                onclose={handleClose}
+              ></c-flow-element-panel>
+            </template>
+            <template lwc:else>
+              <div
+                class="tabs"
+                role="tablist"
+                aria-label="Merge details"
+                onkeydown={handleTabKey}
+              >
+                <template for:each={tabs} for:item="tab">
+                  <button
+                    key={tab.value}
+                    id={tab.id}
+                    class={tab.className}
+                    role="tab"
+                    aria-selected={tab.selected}
+                    aria-controls="merge-tab-panel"
+                    tabindex={tab.tabIndex}
+                    data-tab={tab.value}
+                    onclick={handleTab}
+                  >
+                    {tab.label}
+                  </button>
+                </template>
+              </div>
+
+              <div
+                id="merge-tab-panel"
+                class="tab-panel"
+                role="tabpanel"
+                aria-labelledby={tabPanelLabel}
+              >
+                <template lwc:if={showMapping}>
+                  <c-flow-mapping-panel
+                    plan={plan}
+                    choices={mappingChoices}
+                    notes={mappingNotes}
+                    issues={mappingIssues}
+                    resolved={resolved}
+                    merge={merge}
+                    picks={picks}
+                    onmappingchange={handleMappingChange}
+                    onplace={handleMappingPlace}
+                  ></c-flow-mapping-panel>
+                </template>
+
+                <template lwc:if={showGroups}>
+                  <p class="hint">
+                    Elements that changed together, joined by their connectors.
+                    Take each group from one version, or select it to look
+                    closer or put it somewhere else.
+                  </p>
+                  <template lwc:if={hasGroupRows}>
+                    <ul class="rows">
+                      <template for:each={groupRows} for:item="group">
+                        <li key={group.id} class="row group-row">
+                          <span class="row-title row-static">
+                            <lightning-icon
+                              icon-name="utility:layers"
+                              size="xx-small"
+                              alternative-text=""
+                            ></lightning-icon>
+                            <span class="row-name">
+                              <span>{group.title}</span>
+                              <span class="row-detail">{group.names}</span>
+                            </span>
+                          </span>
+                          <span class="row-status">{group.detail}</span>
+                          <template lwc:if={group.mixed}>
+                            <p class="row-pick mixed-warning">
+                              This group currently combines versions. Choosing
+                              one version replaces every part, including the
+                              other version's edits. Leave it unpicked to keep
+                              the mix, or select it to review each element.
+                            </p>
+                          </template>
+                          <lightning-radio-group
+                            class="row-pick"
+                            name={group.id}
+                            label={group.pickLabel}
+                            variant="label-hidden"
+                            type="button"
+                            options={sideOptions}
+                            value={group.value}
+                            data-group={group.id}
+                            onchange={handleGroupPick}
+                          ></lightning-radio-group>
+                          <lightning-button
+                            class="group-select"
+                            variant="base"
+                            label="Select"
+                            title={group.selectLabel}
+                            data-group={group.id}
+                            onclick={handleGroupSelect}
+                          ></lightning-button>
+                        </li>
+                      </template>
+                    </ul>
+                  </template>
+                </template>
+
+                <template lwc:if={showChanges}>
+                  <div class="row-filters">
+                    <template lwc:if={threeWay}>
+                      <lightning-input
+                        type="toggle"
+                        label="Only unresolved conflicts"
+                        message-toggle-active=""
+                        message-toggle-inactive=""
+                        checked={onlyConflicts}
+                        onchange={handleOnlyConflicts}
+                      ></lightning-input>
+                    </template>
+                    <template lwc:if={hasMoves}>
+                      <lightning-input
+                        class="show-moves"
+                        type="toggle"
+                        label={movesLabel}
+                        message-toggle-active=""
+                        message-toggle-inactive=""
+                        checked={showMoves}
+                        onchange={handleShowMoves}
+                      ></lightning-input>
+                    </template>
+                  </div>
+                  <template lwc:if={hasChangeRows}>
+                    <ul class="rows changes-list">
+                      <template for:each={pagedRows} for:item="row">
+                        <li
+                          key={row.id}
+                          class={row.rowClass}
+                          data-unit={row.id}
+                          onfocusout={handleRowFocusOut}
+                        >
+                          <template lwc:if={row.openable}>
+                            <button
+                              class="row-title"
+                              title={row.rawLabel}
+                              data-kind={row.kind}
+                              data-target={row.target}
+                              onclick={handleRowOpen}
+                            >
+                              <lightning-icon
+                                icon-name={row.icon}
+                                size="xx-small"
+                                alternative-text=""
+                              ></lightning-icon>
+                              <span class="row-name">
+                                <span>{row.label}</span>
+                                <span class="row-detail">{row.detail}</span>
+                              </span>
+                            </button>
+                          </template>
+                          <template lwc:else>
+                            <span
+                              class="row-title row-static"
+                              title={row.rawLabel}
+                            >
+                              <lightning-icon
+                                icon-name={row.icon}
+                                size="xx-small"
+                                alternative-text=""
+                              ></lightning-icon>
+                              <span class="row-name">
+                                <span>{row.label}</span>
+                                <span class="row-detail">{row.detail}</span>
+                              </span>
+                            </span>
+                          </template>
+                          <span class="row-status">{row.statusText}</span>
+                          <template lwc:if={row.values}>
+                            <dl class="row-values">
+                              <template for:each={row.values} for:item="value">
+                                <div key={value.key} class="row-value">
+                                  <dt>{value.label}</dt>
+                                  <dd title={value.text}>{value.text}</dd>
+                                </div>
+                              </template>
+                            </dl>
+                          </template>
+                          <lightning-radio-group
+                            class="row-pick"
+                            name={row.id}
+                            label={row.pickLabel}
+                            variant="label-hidden"
+                            type="button"
+                            options={row.options}
+                            value={row.value}
+                            data-unit={row.id}
+                            onchange={handleRowPick}
+                          ></lightning-radio-group>
+                        </li>
+                      </template>
+                    </ul>
+                    <template lwc:if={hasPages}>
+                      <nav class="pager" aria-label="Pages of differences">
+                        <lightning-button
+                          class="page-previous"
+                          label="Previous page"
+                          icon-name="utility:chevronleft"
+                          disabled={cannotPagePrevious}
+                          onclick={handlePagePrevious}
+                        ></lightning-button>
+                        <span class="page-text" aria-live="polite"
+                          >{pageText}</span
+                        >
+                        <lightning-button
+                          class="page-next"
+                          label="Next page"
+                          icon-name="utility:chevronright"
+                          icon-position="right"
+                          disabled={cannotPageNext}
+                          onclick={handlePageNext}
+                        ></lightning-button>
+                      </nav>
+                    </template>
+                  </template>
+                  <template lwc:else>
+                    <p class="empty">{noChangesText}</p>
+                  </template>
+                </template>
+
+                <template lwc:if={showProblems}>
+                  <template lwc:if={hasProblems}>
+                    <ul class="rows">
+                      <template for:each={problemRows} for:item="problem">
+                        <li key={problem.id} class="problem">
+                          <lightning-icon
+                            icon-name={problem.icon}
+                            variant={problem.variant}
+                            size="x-small"
+                            alternative-text={problem.variant}
+                          ></lightning-icon>
+                          <span class="problem-body">
+                            <button
+                              class="problem-text"
+                              data-node={problem.nodeKey}
+                              data-name={problem.name}
+                              data-mapping={problem.mapping}
+                              onclick={handleProblemOpen}
+                            >
+                              {problem.message}
+                            </button>
+                            <template lwc:if={problem.fix}>
+                              <lightning-button
+                                class="problem-fix"
+                                variant="base"
+                                label={problem.fix.label}
+                                title={problem.fix.title}
+                                data-unit={problem.fix.unit}
+                                data-side={problem.fix.side}
+                                onclick={handleProblemFix}
+                              ></lightning-button>
+                            </template>
+                          </span>
+                        </li>
+                      </template>
+                    </ul>
+                  </template>
+                  <template lwc:else>
+                    <p class="empty">{problemsEmptyText}</p>
+                  </template>
+                </template>
+
+                <template lwc:if={showResources}>
+                  <c-flow-resources-panel
+                    diff={panelDiff}
+                    labels={panelLabels}
+                    merge={merge}
+                    resolved={resolved}
+                    selected-id={selectedId}
+                    selected-prop={stepProp}
+                    onselect={handleResourceSelect}
+                    onpick={handlePick}
+                  ></c-flow-resources-panel>
+                </template>
+              </div>
+            </template>
+          </aside>
+        </div>
+      </div>
+
+      <template lwc:if={textOpened}>
+        <div class={textClass}>
+          <p class="hint">
+            The XML merge works on the flow's Metadata API XML, line by line, so
+            it can find conflicts the visual merge doesn't, such as two versions
+            adding different lines in the same place. It is separate from the
+            picks in the visual merge; saving uses the view you're in.
+          </p>
+          <template lwc:if={hasTextMappingIssues}>
+            <div class="text-mapping">
+              <p class="hint">
+                The other flow's XML is mapped as the visual merge's Mapping tab
+                says, so its mapping's problems hold here too:
+              </p>
+              <ul>
+                <template for:each={textMappingRows} for:item="problem">
+                  <li key={problem.key} class="problem">
+                    <lightning-icon
+                      icon-name={problem.icon}
+                      variant={problem.variant}
+                      size="x-small"
+                      alternative-text={problem.variant}
+                    ></lightning-icon>
+                    <button
+                      class="problem-text text-mapping-open"
+                      data-mapping={problem.mapping}
+                      onclick={handleTextMappingOpen}
+                    >
+                      {problem.message}
+                    </button>
+                  </li>
+                </template>
+              </ul>
+            </div>
+          </template>
+          <c-flow-text-merge
+            sides={textSides}
+            labels={labels}
+            draft-key={draftKey}
+            onresultchange={handleTextChange}
+          ></c-flow-text-merge>
+        </div>
+      </template>
+
+      <c-flow-save-dialog
+        connections={connections}
+        targets={targets}
+        metadata={resultMetadata}
+        save-key={saveKey}
+        change-summary={changeSummary}
+        review={saveReview}
+        source={saveSource}
+        onsaved={handleSaved}
+        onrecompare={handleRecompare}
+        onactivated={handleSavedActivated}
+        onclose={handleSaveClose}
+        open={saveOpen}
+      ></c-flow-save-dialog>
+    </div>
+  </template>
+</template>

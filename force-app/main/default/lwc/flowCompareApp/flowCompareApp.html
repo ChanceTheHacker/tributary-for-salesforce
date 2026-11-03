@@ -1,0 +1,368 @@
+<template>
+  <div class="app">
+    <header class="header">
+      <div class="title">
+        <lightning-icon
+          icon-name="standard:flow"
+          size="medium"
+          alternative-text=""
+        ></lightning-icon>
+        <div>
+          <h1>Tributary</h1>
+          <p class="subtitle">Compare, merge and approve flows.</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <lightning-radio-group
+          class="modes"
+          name="compareMode"
+          label="Compare"
+          variant="label-hidden"
+          type="button"
+          options={modeOptions}
+          value={compareMode}
+          onchange={handleCompareMode}
+        ></lightning-radio-group>
+        <c-flow-help topic="compare-other"></c-flow-help>
+        <c-flow-help-toggle class="help-toggle"></c-flow-help-toggle>
+      </div>
+    </header>
+
+    <template lwc:if={showView}>
+      <div class="comparison-summary">
+        <span>{comparisonTitle}</span>
+        <button
+          class="slds-button slds-button_neutral picker-toggle"
+          aria-expanded={pickersExpanded}
+          aria-controls="comparison-fields"
+          onclick={handleTogglePickers}
+        >
+          {pickerToggleLabel}
+        </button>
+      </div>
+    </template>
+    <section id="comparison-fields" class={pickersClass} hidden={pickersHidden}>
+      <div class="side side-a">
+        <h2 class="side-title">
+          <span class="side-mark side-mark-a" aria-hidden="true">A</span>Compare
+        </h2>
+        <div class="fields">
+          <template lwc:if={showConnectionA}>
+            <lightning-combobox
+              class="connection-a"
+              label="Org A"
+              data-side="a"
+              options={connectionOptions}
+              value={a.connection}
+              onchange={handleConnection}
+            ></lightning-combobox>
+          </template>
+          <c-flow-picker
+            class="flow-a"
+            label={flowLabelA}
+            data-side="a"
+            options={flowOptionsA}
+            value={a.apiName}
+            onchange={handleFlow}
+          ></c-flow-picker>
+          <lightning-combobox
+            class="version-a"
+            label="Version A"
+            placeholder="Choose a version"
+            data-side="a"
+            options={versionOptionsA}
+            value={valueVersionA}
+            disabled={noFlowA}
+            onchange={handleVersion}
+          ></lightning-combobox>
+        </div>
+        <p class="details">{detailsA}</p>
+      </div>
+
+      <div class="swap">
+        <button
+          class="slds-button slds-button_neutral swap-button"
+          aria-label="Swap A and B"
+          title="Swap A and B"
+          disabled={swapDisabled}
+          onclick={handleSwap}
+        >
+          <lightning-icon
+            class="swap-icon"
+            icon-name="utility:change_record_type"
+            size="x-small"
+            style={swapStyle}
+          ></lightning-icon>
+          <span>Swap</span>
+        </button>
+      </div>
+
+      <div class="side side-b">
+        <h2 class="side-title">
+          <span class="side-mark side-mark-b" aria-hidden="true">B</span>With
+        </h2>
+        <div class="fields">
+          <template lwc:if={showConnectionB}>
+            <lightning-combobox
+              class="connection-b"
+              label="Org B"
+              data-side="b"
+              options={connectionOptions}
+              value={b.connection}
+              onchange={handleConnection}
+            ></lightning-combobox>
+          </template>
+          <template lwc:if={showFlowB}>
+            <c-flow-picker
+              class="flow-b"
+              label="Flow B"
+              data-side="b"
+              options={flowOptionsB}
+              value={b.apiName}
+              onchange={handleFlow}
+            ></c-flow-picker>
+          </template>
+          <lightning-combobox
+            class="version-b"
+            label="Version B"
+            placeholder="Choose a version"
+            data-side="b"
+            options={versionOptionsB}
+            value={valueVersionB}
+            disabled={noFlowB}
+            onchange={handleVersion}
+          ></lightning-combobox>
+        </div>
+        <p class="details">{detailsB}</p>
+      </div>
+
+      <div class="base">
+        <lightning-input
+          type="toggle"
+          label="Three-way merge"
+          field-level-help={baseHelp}
+          message-toggle-active=""
+          message-toggle-inactive=""
+          checked={useBase}
+          disabled={noFlowA}
+          onchange={handleUseBase}
+        ></lightning-input>
+        <template lwc:if={useBase}>
+          <lightning-combobox
+            class="base-version"
+            label="Common base (a version of A's flow)"
+            field-level-help="The version both edits started from. Changes made on one side only are then taken automatically."
+            placeholder="Choose the base"
+            options={baseOptions}
+            value={valueBase}
+            onchange={handleBase}
+          ></lightning-combobox>
+          <template lwc:if={baseWarning}>
+            <p class="base-warning" role="status">{baseWarning}</p>
+          </template>
+        </template>
+      </div>
+    </section>
+
+    <template lwc:if={error}>
+      <div class="error" role="alert">
+        <lightning-icon
+          icon-name="utility:error"
+          variant="error"
+          size="x-small"
+          alternative-text="Error"
+        ></lightning-icon>
+        <span class="error-text">{error}</span>
+        <template lwc:if={showRetry}>
+          <lightning-button
+            label="Try again"
+            icon-name="utility:refresh"
+            onclick={handleRetry}
+          ></lightning-button>
+        </template>
+        <template lwc:if={showSetupLink}>
+          <lightning-button
+            variant="base"
+            label="Open Tributary Setup"
+            onclick={handleOpenSetup}
+          ></lightning-button>
+        </template>
+        <lightning-button-icon
+          icon-name="utility:close"
+          variant="bare"
+          alternative-text="Dismiss"
+          onclick={handleDismissError}
+        ></lightning-button-icon>
+      </div>
+    </template>
+
+    <template lwc:if={showSkeleton}>
+      <div class="loading" role="status">
+        <p class="loading-text">{loadingText}</p>
+        <div class="skeleton-bar" aria-hidden="true">
+          <span class="bone bone-wide"></span>
+          <span class="bone"></span>
+          <span class="bone"></span>
+        </div>
+        <div class="skeleton-body" aria-hidden="true">
+          <div class="bone bone-canvas"></div>
+          <div class="bone bone-side"></div>
+        </div>
+      </div>
+    </template>
+
+    <template lwc:if={showEmpty}>
+      <div class="empty">
+        <div class="empty-art" aria-hidden="true">
+          <span class="art-tile"></span>
+          <span class="art-line"></span>
+          <span class="art-tile art-changed"></span>
+          <span class="art-line"></span>
+          <span class="art-tile art-added"></span>
+        </div>
+        <template lwc:if={emptyTitle}>
+          <h2 class="empty-title">{emptyTitle}</h2>
+        </template>
+        <p class="empty-text">{emptyText}</p>
+        <c-flow-help topic="compare" variant="link"></c-flow-help>
+      </div>
+    </template>
+
+    <template lwc:if={showView}>
+      <div class="tab-row">
+        <div class="tabs" role="tablist" onkeydown={handleTabKey}>
+          <template for:each={tabs} for:item="item">
+            <button
+              key={item.value}
+              id={item.id}
+              class={item.className}
+              role="tab"
+              aria-selected={item.selected}
+              aria-controls={item.panelId}
+              tabindex={item.tabIndex}
+              data-tab={item.value}
+              onclick={handleTab}
+            >
+              {item.label}
+            </button>
+          </template>
+          <template lwc:if={showBusyBar}>
+            <span class="busy-bar" role="status">
+              <span class="slds-assistive-text">Updating</span>
+            </span>
+          </template>
+        </div>
+        <c-flow-help topic={tabHelp}></c-flow-help>
+      </div>
+
+      <template for:each={views} for:item="view">
+        <div key={view.key} class={panelClass} aria-busy={panelBusy}>
+          <template lwc:if={mountCompare}>
+            <div
+              id={view.compareId}
+              class={compareClass}
+              role="tabpanel"
+              aria-labelledby="tab-compare"
+            >
+              <template lwc:if={requestId}>
+                <c-flow-approvals
+                  embedded
+                  request-id={requestId}
+                  comparison={approvalComparison}
+                  ondecided={handleMergeActivated}
+                ></c-flow-approvals>
+              </template>
+              <c-flow-diff-view
+                labels={loaded.labels}
+                before={loaded.before}
+                after={loaded.after}
+                view={diffView}
+                xml-layout={diffLayout}
+                selected-element={diffSelection}
+                onselectionchange={handleDiffSelection}
+                onviewchange={handleDiffView}
+              ></c-flow-diff-view>
+            </div>
+          </template>
+
+          <template lwc:if={mountMerge}>
+            <div
+              id={view.mergeId}
+              class={mergeClass}
+              role="tabpanel"
+              aria-labelledby="tab-merge"
+            >
+              <template lwc:if={needsBase}>
+                <p class="note base-needed">
+                  Choose the common base above to merge three ways, or turn off
+                  Three-way merge.
+                </p>
+              </template>
+              <template lwc:else>
+                <c-flow-merge-view
+                  labels={loaded.labels}
+                  sides={loaded.mergeSides}
+                  draft-key={loaded.key}
+                  connections={loaded.saveConnections}
+                  targets={loaded.targets}
+                  lineage={loaded.lineage}
+                  can-save={canSave}
+                  onsaved={handleSaved}
+                  onactivated={handleMergeActivated}
+                  onrecompare={handleRecompare}
+                ></c-flow-merge-view>
+              </template>
+            </div>
+          </template>
+
+          <template lwc:if={isActivate}>
+            <div
+              id={view.activateId}
+              class="tab-panel activations"
+              role="tabpanel"
+              aria-labelledby="tab-activate"
+            >
+              <template for:each={activations} for:item="item">
+                <article key={item.key} class="activation">
+                  <h3>
+                    <span class={item.markClass} aria-hidden="true"
+                      >{item.mark}</span
+                    >{item.title}
+                  </h3>
+                  <p class="activation-flow">
+                    {item.label} · {item.connectionLabel} · {item.role}
+                  </p>
+                  <template lwc:if={item.managed}>
+                    <p class="note">
+                      This flow is managed by a package; its versions are
+                      activated in Setup.
+                    </p>
+                  </template>
+                  <template lwc:else>
+                    <c-flow-activation
+                      connection={item.connection}
+                      label={item.label}
+                      version-number={item.versionNumber}
+                      version-id={item.versionId}
+                      active-version={item.activeVersion}
+                      org-label={item.connectionLabel}
+                      secondary={item.secondary}
+                      change-summary={item.summary}
+                      review-checks={item.checks}
+                      compared-version={item.comparedVersion}
+                      reviewed-at={item.reviewedAt}
+                      data-connection={item.connection}
+                      data-api-name={item.apiName}
+                      onactivated={handleActivated}
+                      api-name={item.apiName}
+                    ></c-flow-activation>
+                  </template>
+                </article>
+              </template>
+            </div>
+          </template>
+        </div>
+      </template>
+    </template>
+  </div>
+</template>

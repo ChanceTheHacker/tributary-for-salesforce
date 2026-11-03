@@ -1,0 +1,275 @@
+<template>
+  <template lwc:if={hasEntry}>
+    <section class="panel" aria-label={title}>
+      <header class="head">
+        <lightning-icon
+          icon-name={icon}
+          size="small"
+          class="icon"
+        ></lightning-icon>
+        <div class="titles">
+          <h2 class="slds-text-heading_small title" title={title} tabindex="-1">
+            {title}
+          </h2>
+          <p class="meta">
+            <span>{typeLabel}</span>
+            <template lwc:if={apiName}>
+              <span class="api">{apiName}</span>
+            </template>
+          </p>
+        </div>
+        <span class={statusClass}>{statusLabel}</span>
+        <lightning-button-icon
+          icon-name="utility:close"
+          variant="bare"
+          alternative-text="Close"
+          title="Close"
+          onclick={handleClose}
+        ></lightning-button-icon>
+      </header>
+
+      <template lwc:if={summary}>
+        <p class="summary">{summary}</p>
+      </template>
+
+      <template lwc:if={isMerge}>
+        <template lwc:if={hasIssues}>
+          <ul class="issues">
+            <template for:each={issues} for:item="issue">
+              <li key={issue.id} class="issue">
+                <lightning-icon
+                  icon-name={issue.icon}
+                  variant={issue.variant}
+                  size="x-small"
+                ></lightning-icon>
+                <span>{issue.message}</span>
+              </li>
+            </template>
+          </ul>
+        </template>
+        <template lwc:if={hasUnits}>
+          <h3 class="section">Pick a version for each change</h3>
+          <template for:each={unitRows} for:item="row">
+            <fieldset key={row.id} class={row.rowClass}>
+              <legend class="unit-label">
+                <span class="unit-name" title={row.rawLabel}>{row.label}</span>
+                <template lwc:if={row.conflict}>
+                  <span class="tag tag-conflict">Conflict</span>
+                </template>
+                <template lwc:if={row.resolvedConflict}>
+                  <span class="tag tag-resolved">Resolved</span>
+                </template>
+              </legend>
+              <div class="cells">
+                <template for:each={row.cells} for:item="cell">
+                  <label key={cell.key} class={cell.cellClass}>
+                    <span class="cell-head">
+                      <input
+                        type="radio"
+                        name={cell.radioName}
+                        checked={cell.checked}
+                        aria-label={cell.ariaLabel}
+                        aria-describedby={cell.summaryId}
+                        data-unit={row.id}
+                        data-side={cell.side}
+                        onchange={handleRadio}
+                      />
+                      <span class="cell-side">{cell.label}</span>
+                      <template lwc:if={cell.action}>
+                        <span class="cell-action">{cell.action}</span>
+                      </template>
+                      <template lwc:if={cell.preview}>
+                        <span class="preview">Shown until you pick</span>
+                      </template>
+                    </span>
+                    <span class="value">
+                      <template for:each={cell.lines} for:item="line">
+                        <span key={line.key} class={line.className}
+                          >{line.text}</span
+                        >
+                      </template>
+                    </span>
+                    <span id={cell.summaryId} class="slds-assistive-text" hidden
+                      >{cell.summary}</span
+                    >
+                  </label>
+                </template>
+              </div>
+              <template lwc:if={row.compactable}>
+                <button
+                  class="slds-button expand"
+                  aria-expanded={row.expandedText}
+                  data-unit={row.id}
+                  onclick={handleExpand}
+                >
+                  {row.expandLabel}
+                </button>
+              </template>
+            </fieldset>
+          </template>
+          <template lwc:if={hasSideButtons}>
+            <div class="take-all">
+              <span class="take-all-label">Use every part from</span>
+              <div
+                class="side-buttons"
+                role="group"
+                aria-label="Use every part from"
+              >
+                <template for:each={sideButtons} for:item="button">
+                  <lightning-button
+                    key={button.key}
+                    label={button.label}
+                    title={button.title}
+                    data-side={button.side}
+                    onclick={handleTakeAll}
+                  ></lightning-button>
+                </template>
+              </div>
+            </div>
+          </template>
+        </template>
+        <template lwc:else>
+          <p class="summary">Every version agrees on this.</p>
+        </template>
+        <template lwc:if={canRewire}>
+          <h3 class="section">Goes to</h3>
+          <c-flow-connect
+            class="connect"
+            resolved={resolved}
+            picks={picks}
+            node-key={entry.key}
+            onpick={handleConnect}
+          ></c-flow-connect>
+        </template>
+        <template lwc:if={nextLabel}>
+          <div class="next">
+            <lightning-button
+              label={nextLabel}
+              icon-name="utility:chevrondown"
+              icon-position="right"
+              onclick={handleNext}
+            ></lightning-button>
+          </div>
+        </template>
+      </template>
+
+      <template lwc:if={isDiff}>
+        <template lwc:if={hasChanges}>
+          <h3 class="section">Changes</h3>
+          <ul class="changes">
+            <template for:each={changes} for:item="change">
+              <li key={change.id} class={change.rowClass}>
+                <div class="change-head">
+                  <span class="path" title={change.rawPath}>{change.path}</span>
+                  <span class="change-status">{change.statusLabel}</span>
+                </div>
+                <template lwc:if={change.hasBefore}>
+                  <div class="line before">
+                    <span class="mark" aria-hidden="true">−</span>
+                    <div class="line-body">
+                      <span class="line-side">{beforeLabel}</span>
+                      <span class="text">
+                        <template
+                          for:each={change.before.lines}
+                          for:item="line"
+                        >
+                          <span key={line.key} class={line.className}
+                            >{line.text}</span
+                          >
+                        </template>
+                      </span>
+                    </div>
+                  </div>
+                </template>
+                <template lwc:if={change.hasAfter}>
+                  <div class="line after">
+                    <span class="mark" aria-hidden="true">+</span>
+                    <div class="line-body">
+                      <span class="line-side">{afterLabel}</span>
+                      <span class="text">
+                        <template for:each={change.after.lines} for:item="line">
+                          <span key={line.key} class={line.className}
+                            >{line.text}</span
+                          >
+                        </template>
+                      </span>
+                    </div>
+                  </div>
+                </template>
+              </li>
+            </template>
+          </ul>
+        </template>
+      </template>
+
+      <template lwc:if={hasConnectors}>
+        <h3 class="section">Connectors</h3>
+        <ul class="connectors">
+          <template for:each={connectors} for:item="connector">
+            <li key={connector.id} class={connector.rowClass}>
+              <span class="connector-label">{connector.label}</span>
+              <lightning-icon
+                icon-name="utility:forward"
+                size="xx-small"
+              ></lightning-icon>
+              <template lwc:if={connector.oldTarget}>
+                <s class="old-target"
+                  ><span class="slds-assistive-text">was </span
+                  >{connector.oldTarget}</s
+                >
+              </template>
+              <span class="target"
+                ><span lwc:if={connector.oldTarget} class="slds-assistive-text"
+                  >now </span
+                >{connector.target}</span
+              >
+              <template lwc:if={connector.showBadge}>
+                <span class="connector-status">{connector.statusLabel}</span>
+              </template>
+            </li>
+          </template>
+        </ul>
+      </template>
+
+      <template lwc:if={hasProperties}>
+        <details
+          class="properties"
+          open={propertiesOpen}
+          ontoggle={handlePropertiesToggle}
+        >
+          <summary class="section">
+            <lightning-icon
+              icon-name="utility:chevronright"
+              size="xx-small"
+              class="chevron"
+            ></lightning-icon>
+            Properties
+          </summary>
+          <template lwc:if={propertiesOpen}>
+            <dl>
+              <template for:each={properties} for:item="property">
+                <div key={property.key} class="property">
+                  <dt title={property.key}>{property.label}</dt>
+                  <dd>
+                    <span class="multiline">{property.text}</span>
+                  </dd>
+                </div>
+              </template>
+            </dl>
+          </template>
+        </details>
+      </template>
+
+      <template lwc:if={showText}>
+        <div class="footer">
+          <lightning-button
+            label="Show in XML"
+            icon-name="utility:code"
+            variant="base"
+            onclick={handleShowText}
+          ></lightning-button>
+        </div>
+      </template>
+    </section>
+  </template>
+</template>

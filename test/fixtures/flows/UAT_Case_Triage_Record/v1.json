@@ -1,0 +1,417 @@
+{
+  "FullName": "UAT_Case_Triage_Record",
+  "Metadata": {
+    "apiVersion": 62,
+    "status": "Draft",
+    "processMetadataValues": [
+      {
+        "name": "CanvasMode",
+        "value": {
+          "stringValue": "FREE_FORM_CANVAS"
+        }
+      },
+      {
+        "name": "BuilderType",
+        "value": {
+          "stringValue": "LightningFlowBuilder"
+        }
+      }
+    ],
+    "label": "UAT Case Triage Record",
+    "description": "Triage a case when it's created or changed: SLA by priority, key accounts, a follow-up task and origin tags.",
+    "processType": "AutoLaunchedFlow",
+    "interviewLabel": "UAT Case Triage Record {!$Flow.CurrentDateTime}",
+    "start": {
+      "locationX": 600,
+      "locationY": 0,
+      "object": "Case",
+      "recordTriggerType": "CreateAndUpdate",
+      "triggerType": "RecordAfterSave",
+      "connector": {
+        "targetReference": "Check_Status"
+      }
+    },
+    "decisions": [
+      {
+        "label": "Check Status",
+        "name": "Check_Status",
+        "rules": [
+          {
+            "name": "Closed",
+            "label": "Closed",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "$Record.IsClosed",
+                "operator": "EqualTo",
+                "rightValue": {
+                  "booleanValue": true
+                }
+              }
+            ]
+          }
+        ],
+        "defaultConnectorLabel": "Open",
+        "defaultConnector": {
+          "targetReference": "Get_Account"
+        },
+        "locationX": 600,
+        "locationY": 160
+      },
+      {
+        "label": "Check Priority",
+        "name": "Check_Priority",
+        "rules": [
+          {
+            "name": "High",
+            "label": "High",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "$Record.Priority",
+                "operator": "EqualTo",
+                "rightValue": {
+                  "stringValue": "High"
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Escalate"
+            }
+          },
+          {
+            "name": "Medium",
+            "label": "Medium",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "$Record.Priority",
+                "operator": "EqualTo",
+                "rightValue": {
+                  "stringValue": "Medium"
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Set_Medium_SLA"
+            }
+          }
+        ],
+        "defaultConnectorLabel": "Otherwise",
+        "defaultConnector": {
+          "targetReference": "Set_Low_SLA"
+        },
+        "locationX": 600,
+        "locationY": 480
+      },
+      {
+        "label": "Check Account Tier",
+        "name": "Check_Account_Tier",
+        "rules": [
+          {
+            "name": "Key_Account",
+            "label": "Key Account",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "Get_Account.Rating",
+                "operator": "EqualTo",
+                "rightValue": {
+                  "stringValue": "Hot"
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Shorten_SLA"
+            }
+          }
+        ],
+        "defaultConnectorLabel": "Otherwise",
+        "defaultConnector": {
+          "targetReference": "Create_Follow_Up"
+        },
+        "locationX": 600,
+        "locationY": 960
+      },
+      {
+        "label": "Check Origin",
+        "name": "Check_Origin",
+        "rules": [
+          {
+            "name": "Web",
+            "label": "Web",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "$Record.Origin",
+                "operator": "EqualTo",
+                "rightValue": {
+                  "stringValue": "Web"
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Tag_Web"
+            }
+          },
+          {
+            "name": "Email",
+            "label": "Email",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "$Record.Origin",
+                "operator": "EqualTo",
+                "rightValue": {
+                  "stringValue": "Email"
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Tag_Email"
+            }
+          }
+        ],
+        "defaultConnectorLabel": "Otherwise",
+        "locationX": 470,
+        "locationY": 1440
+      }
+    ],
+    "recordLookups": [
+      {
+        "label": "Get Account",
+        "name": "Get_Account",
+        "object": "Account",
+        "filterLogic": "and",
+        "filters": [
+          {
+            "field": "Id",
+            "operator": "EqualTo",
+            "value": {
+              "elementReference": "$Record.AccountId"
+            }
+          }
+        ],
+        "getFirstRecordOnly": true,
+        "storeOutputAutomatically": true,
+        "connector": {
+          "targetReference": "Check_Priority"
+        },
+        "faultConnector": {
+          "targetReference": "Log_Fault"
+        },
+        "locationX": 600,
+        "locationY": 320
+      }
+    ],
+    "assignments": [
+      {
+        "label": "Log Fault",
+        "name": "Log_Fault",
+        "assignmentItems": [
+          {
+            "assignToReference": "faultText",
+            "operator": "Assign",
+            "value": {
+              "elementReference": "$Flow.FaultMessage"
+            }
+          }
+        ],
+        "locationX": 730,
+        "locationY": 1440
+      },
+      {
+        "label": "Set High SLA",
+        "name": "Set_High_SLA",
+        "assignmentItems": [
+          {
+            "assignToReference": "slaHours",
+            "operator": "Assign",
+            "value": {
+              "numberValue": 4
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Check_Account_Tier"
+        },
+        "locationX": 600,
+        "locationY": 800
+      },
+      {
+        "label": "Set Medium SLA",
+        "name": "Set_Medium_SLA",
+        "assignmentItems": [
+          {
+            "assignToReference": "slaHours",
+            "operator": "Assign",
+            "value": {
+              "numberValue": 24
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Check_Account_Tier"
+        },
+        "locationX": 860,
+        "locationY": 640
+      },
+      {
+        "label": "Set Low SLA",
+        "name": "Set_Low_SLA",
+        "assignmentItems": [
+          {
+            "assignToReference": "slaHours",
+            "operator": "Assign",
+            "value": {
+              "numberValue": 72
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Check_Account_Tier"
+        },
+        "locationX": 340,
+        "locationY": 640
+      },
+      {
+        "label": "Shorten SLA",
+        "name": "Shorten_SLA",
+        "assignmentItems": [
+          {
+            "assignToReference": "slaHours",
+            "operator": "Subtract",
+            "value": {
+              "numberValue": 2
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Create_Follow_Up"
+        },
+        "locationX": 600,
+        "locationY": 1120
+      },
+      {
+        "label": "Tag Web",
+        "name": "Tag_Web",
+        "assignmentItems": [
+          {
+            "assignToReference": "originNote",
+            "operator": "Assign",
+            "value": {
+              "stringValue": "Came in on the web"
+            }
+          }
+        ],
+        "locationX": 470,
+        "locationY": 1600
+      },
+      {
+        "label": "Tag Email",
+        "name": "Tag_Email",
+        "assignmentItems": [
+          {
+            "assignToReference": "originNote",
+            "operator": "Assign",
+            "value": {
+              "stringValue": "Came in by email"
+            }
+          }
+        ],
+        "locationX": 730,
+        "locationY": 1600
+      }
+    ],
+    "recordUpdates": [
+      {
+        "label": "Escalate",
+        "name": "Escalate",
+        "inputReference": "$Record",
+        "inputAssignments": [
+          {
+            "field": "IsEscalated",
+            "value": {
+              "booleanValue": true
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Set_High_SLA"
+        },
+        "faultConnector": {
+          "targetReference": "Log_Fault"
+        },
+        "locationX": 600,
+        "locationY": 640
+      }
+    ],
+    "recordCreates": [
+      {
+        "label": "Create Follow Up",
+        "name": "Create_Follow_Up",
+        "object": "Task",
+        "inputAssignments": [
+          {
+            "field": "Subject",
+            "value": {
+              "elementReference": "followUpSubject"
+            }
+          },
+          {
+            "field": "WhatId",
+            "value": {
+              "elementReference": "$Record.Id"
+            }
+          },
+          {
+            "field": "Priority",
+            "value": {
+              "elementReference": "$Record.Priority"
+            }
+          }
+        ],
+        "storeOutputAutomatically": true,
+        "connector": {
+          "targetReference": "Check_Origin"
+        },
+        "faultConnector": {
+          "targetReference": "Log_Fault"
+        },
+        "locationX": 600,
+        "locationY": 1280
+      }
+    ],
+    "variables": [
+      {
+        "name": "slaHours",
+        "dataType": "Number",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": false,
+        "scale": 2
+      },
+      {
+        "name": "faultText",
+        "dataType": "String",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": false
+      },
+      {
+        "name": "originNote",
+        "dataType": "String",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": false
+      }
+    ],
+    "textTemplates": [
+      {
+        "name": "followUpSubject",
+        "isViewedAsPlainText": true,
+        "text": "Follow up on {!$Record.CaseNumber}: {!$Record.Subject}"
+      }
+    ]
+  }
+}

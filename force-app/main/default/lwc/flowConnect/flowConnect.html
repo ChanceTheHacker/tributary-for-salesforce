@@ -1,0 +1,31 @@
+<template>
+  <template lwc:if={hasRows}>
+    <ul class="rows">
+      <template for:each={rows} for:item="row">
+        <li key={row.id} class={row.rowClass}>
+          <c-flow-picker
+            class="target"
+            label={row.label}
+            placeholder="Choose where it goes"
+            noun="elements"
+            options={row.options}
+            value={row.value}
+            data-id={row.id}
+            onchange={handleTarget}
+          ></c-flow-picker>
+          <template lwc:if={row.rewired}>
+            <span class="tag">Rewired</span>
+            <lightning-button
+              class="undo"
+              variant="base"
+              label="Undo"
+              title="Put this connector back as the picked version has it"
+              data-id={row.id}
+              onclick={handleUndo}
+            ></lightning-button>
+          </template>
+        </li>
+      </template>
+    </ul>
+  </template>
+</template>

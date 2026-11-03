@@ -1,0 +1,414 @@
+{
+  "FullName": "UAT_Case_Triage_Sub",
+  "Metadata": {
+    "apiVersion": 62,
+    "status": "Draft",
+    "processMetadataValues": [
+      {
+        "name": "CanvasMode",
+        "value": {
+          "stringValue": "FREE_FORM_CANVAS"
+        }
+      },
+      {
+        "name": "BuilderType",
+        "value": {
+          "stringValue": "LightningFlowBuilder"
+        }
+      }
+    ],
+    "label": "UAT Case Triage Sub",
+    "description": "Escalate a case passed in, email its contact and count the account's open cases.",
+    "processType": "AutoLaunchedFlow",
+    "interviewLabel": "UAT Case Triage Sub {!$Flow.CurrentDateTime}",
+    "start": {
+      "locationX": 600,
+      "locationY": 0,
+      "connector": {
+        "targetReference": "Check_Priority"
+      }
+    },
+    "decisions": [
+      {
+        "label": "Check Priority",
+        "name": "Check_Priority",
+        "rules": [
+          {
+            "name": "High",
+            "label": "High",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "caseRecord.Priority",
+                "operator": "EqualTo",
+                "rightValue": {
+                  "stringValue": "High"
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Escalate"
+            }
+          }
+        ],
+        "defaultConnectorLabel": "Otherwise",
+        "defaultConnector": {
+          "targetReference": "Check_SLA"
+        },
+        "locationX": 600,
+        "locationY": 160
+      },
+      {
+        "label": "Check SLA",
+        "name": "Check_SLA",
+        "rules": [
+          {
+            "name": "Escalated",
+            "label": "Escalated",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "caseRecord.IsEscalated",
+                "operator": "EqualTo",
+                "rightValue": {
+                  "booleanValue": true
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Notify_Manager"
+            }
+          }
+        ],
+        "defaultConnectorLabel": "Otherwise",
+        "defaultConnector": {
+          "targetReference": "Get_Contact"
+        },
+        "locationX": 600,
+        "locationY": 480
+      },
+      {
+        "label": "Check Contact",
+        "name": "Check_Contact",
+        "rules": [
+          {
+            "name": "Has_Email",
+            "label": "Has Email",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "Get_Contact.Email",
+                "operator": "IsNull",
+                "rightValue": {
+                  "booleanValue": false
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Build_Email"
+            }
+          }
+        ],
+        "defaultConnectorLabel": "Otherwise",
+        "defaultConnector": {
+          "targetReference": "Update_Case"
+        },
+        "locationX": 600,
+        "locationY": 960
+      }
+    ],
+    "recordUpdates": [
+      {
+        "label": "Escalate",
+        "name": "Escalate",
+        "object": "Case",
+        "filterLogic": "and",
+        "filters": [
+          {
+            "field": "Id",
+            "operator": "EqualTo",
+            "value": {
+              "elementReference": "caseRecord.Id"
+            }
+          }
+        ],
+        "inputAssignments": [
+          {
+            "field": "IsEscalated",
+            "value": {
+              "booleanValue": true
+            }
+          },
+          {
+            "field": "Priority",
+            "value": {
+              "stringValue": "High"
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Check_SLA"
+        },
+        "faultConnector": {
+          "targetReference": "Handle_Error"
+        },
+        "locationX": 600,
+        "locationY": 320
+      },
+      {
+        "label": "Update Case",
+        "name": "Update_Case",
+        "object": "Case",
+        "filterLogic": "and",
+        "filters": [
+          {
+            "field": "Id",
+            "operator": "EqualTo",
+            "value": {
+              "elementReference": "caseRecord.Id"
+            }
+          }
+        ],
+        "inputAssignments": [
+          {
+            "field": "Description",
+            "value": {
+              "elementReference": "managerNote"
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Get_Open_Cases"
+        },
+        "faultConnector": {
+          "targetReference": "Handle_Error"
+        },
+        "locationX": 600,
+        "locationY": 1280
+      }
+    ],
+    "assignments": [
+      {
+        "label": "Notify Manager",
+        "name": "Notify_Manager",
+        "assignmentItems": [
+          {
+            "assignToReference": "managerNote",
+            "operator": "Assign",
+            "value": {
+              "stringValue": "Case {!caseRecord.CaseNumber} was escalated"
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Get_Contact"
+        },
+        "locationX": 600,
+        "locationY": 640
+      },
+      {
+        "label": "Build Email",
+        "name": "Build_Email",
+        "assignmentItems": [
+          {
+            "assignToReference": "emailBody",
+            "operator": "Assign",
+            "value": {
+              "elementReference": "emailText"
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Update_Case"
+        },
+        "locationX": 600,
+        "locationY": 1120
+      },
+      {
+        "label": "Count Case",
+        "name": "Count_Case",
+        "assignmentItems": [
+          {
+            "assignToReference": "openCount",
+            "operator": "Add",
+            "value": {
+              "numberValue": 1
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Loop_Cases"
+        },
+        "locationX": 470,
+        "locationY": 1760
+      },
+      {
+        "label": "Log Done",
+        "name": "Log_Done",
+        "assignmentItems": [
+          {
+            "assignToReference": "resultText",
+            "operator": "Assign",
+            "value": {
+              "stringValue": "{!openCount} open cases on the account"
+            }
+          }
+        ],
+        "locationX": 730,
+        "locationY": 1760
+      },
+      {
+        "label": "Handle Error",
+        "name": "Handle_Error",
+        "assignmentItems": [
+          {
+            "assignToReference": "errorText",
+            "operator": "Assign",
+            "value": {
+              "elementReference": "$Flow.FaultMessage"
+            }
+          }
+        ],
+        "locationX": 730,
+        "locationY": 1600
+      }
+    ],
+    "recordLookups": [
+      {
+        "label": "Get Contact",
+        "name": "Get_Contact",
+        "object": "Contact",
+        "filterLogic": "and",
+        "filters": [
+          {
+            "field": "Id",
+            "operator": "EqualTo",
+            "value": {
+              "elementReference": "caseRecord.ContactId"
+            }
+          }
+        ],
+        "getFirstRecordOnly": true,
+        "storeOutputAutomatically": true,
+        "connector": {
+          "targetReference": "Check_Contact"
+        },
+        "faultConnector": {
+          "targetReference": "Handle_Error"
+        },
+        "locationX": 600,
+        "locationY": 800
+      },
+      {
+        "label": "Get Open Cases",
+        "name": "Get_Open_Cases",
+        "object": "Case",
+        "filterLogic": "and",
+        "filters": [
+          {
+            "field": "AccountId",
+            "operator": "EqualTo",
+            "value": {
+              "elementReference": "caseRecord.AccountId"
+            }
+          },
+          {
+            "field": "IsClosed",
+            "operator": "EqualTo",
+            "value": {
+              "booleanValue": false
+            }
+          }
+        ],
+        "getFirstRecordOnly": false,
+        "storeOutputAutomatically": true,
+        "connector": {
+          "targetReference": "Loop_Cases"
+        },
+        "faultConnector": {
+          "targetReference": "Handle_Error"
+        },
+        "locationX": 600,
+        "locationY": 1440
+      }
+    ],
+    "loops": [
+      {
+        "label": "Loop Cases",
+        "name": "Loop_Cases",
+        "collectionReference": "Get_Open_Cases",
+        "assignNextValueToReference": "currentCase",
+        "iterationOrder": "Asc",
+        "nextValueConnector": {
+          "targetReference": "Count_Case"
+        },
+        "noMoreValuesConnector": {
+          "targetReference": "Log_Done"
+        },
+        "locationX": 470,
+        "locationY": 1600
+      }
+    ],
+    "variables": [
+      {
+        "name": "caseRecord",
+        "dataType": "SObject",
+        "isCollection": false,
+        "isInput": true,
+        "isOutput": false,
+        "objectType": "Case"
+      },
+      {
+        "name": "currentCase",
+        "dataType": "SObject",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": false,
+        "objectType": "Case"
+      },
+      {
+        "name": "managerNote",
+        "dataType": "String",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": false
+      },
+      {
+        "name": "emailBody",
+        "dataType": "String",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": false
+      },
+      {
+        "name": "openCount",
+        "dataType": "Number",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": true,
+        "scale": 2
+      },
+      {
+        "name": "resultText",
+        "dataType": "String",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": true
+      },
+      {
+        "name": "errorText",
+        "dataType": "String",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": true
+      }
+    ],
+    "textTemplates": [
+      {
+        "name": "emailText",
+        "isViewedAsPlainText": true,
+        "text": "Hi {!Get_Contact.FirstName}, case {!caseRecord.CaseNumber} ({!caseRecord.Subject}) is being looked at."
+      }
+    ]
+  }
+}

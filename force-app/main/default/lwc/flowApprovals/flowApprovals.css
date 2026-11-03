@@ -1,0 +1,311 @@
+@import "c/flowTokens";
+@import "c/flowBand";
+
+:host {
+  display: block;
+}
+
+.page {
+  background: #fff;
+  border-radius: 0.25rem;
+  padding: 1rem;
+  min-height: calc(100vh - 7rem);
+  position: relative;
+}
+
+.page.embedded {
+  min-height: 0;
+  padding: 0.5rem 0;
+}
+
+.embedded > .request-head {
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.subtitle,
+.meta {
+  color: var(--fc-ink-40);
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-label {
+  color: var(--fc-cream);
+  font-size: 0.75rem;
+}
+
+.status {
+  width: 11rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--fc-ink-90);
+  margin: 0.75rem 0;
+}
+
+.tab {
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: var(--fc-ink-30);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    color var(--fc-dur-fast) ease,
+    border-color var(--fc-dur-fast) ease;
+}
+
+.tab:hover {
+  color: var(--fc-brand);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--fc-focus);
+  outline-offset: -2px;
+}
+
+.tab-active {
+  border-bottom-color: var(--fc-brand);
+  color: var(--fc-brand);
+}
+
+.requests {
+  display: grid;
+  gap: 0.75rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.results {
+  position: relative;
+  min-height: 6rem;
+}
+
+.results .requests,
+.results .empty {
+  transition: opacity var(--fc-dur) ease;
+}
+
+.results.busy .requests {
+  opacity: 0.5;
+}
+
+.request {
+  border: 1px solid var(--fc-ink-90);
+  border-radius: 0.25rem;
+  padding: 0.75rem 1rem;
+  display: grid;
+  gap: 0.375rem;
+  animation: fade-in var(--fc-dur) var(--fc-ease-out) backwards;
+  transition:
+    border-color var(--fc-dur) ease,
+    box-shadow var(--fc-dur) ease;
+}
+
+.request-highlight {
+  border-color: var(--fc-select);
+  box-shadow: 0 0 0 1px var(--fc-select);
+}
+
+.linked {
+  font-weight: 600;
+}
+
+/* "Show the full text" sits under the text it opens, not stretched across. */
+.show-full {
+  justify-self: start;
+}
+
+.more {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.75rem;
+}
+
+.request-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.request-title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.comments {
+  border-left: 3px solid var(--fc-ink-80);
+  padding-left: 0.75rem;
+  white-space: pre-wrap;
+}
+
+/* A merge's receipt comes as lines: where it came from, what was decided
+   and what was checked. */
+.change {
+  font-size: 0.8125rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.error {
+  color: var(--fc-macaw-30);
+  background: var(--fc-macaw-95);
+  border-radius: 0.25rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+}
+
+.decide {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+/* Over the list, so a reload doesn't push it down. */
+.loading {
+  position: absolute;
+  z-index: 1;
+  top: 2.5rem;
+  left: 50%;
+  width: 3rem;
+  height: 3rem;
+  transform: translateX(-50%);
+}
+
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  padding: 3rem 1rem;
+  color: var(--fc-ink-40);
+  text-align: center;
+  animation: fade-in var(--fc-dur) var(--fc-ease-out) backwards;
+}
+
+.empty-icon {
+  --slds-c-icon-color-foreground-default: var(--fc-ink-50);
+}
+
+.empty-done {
+  --slds-c-icon-color-foreground-default: var(--fc-canopy-50);
+}
+
+/* Dialogs rise into place over a fading backdrop. */
+.slds-modal__container {
+  animation: dialog-in var(--fc-dur) var(--fc-ease-out) backwards;
+}
+
+/*
+ * Salesforce's header covers the top of the window, so dialogs keep below it
+ * and scroll their body when there isn't room. The header is taller when its
+ * items wrap.
+ */
+.slds-modal__container {
+  padding-top: 9rem;
+  padding-bottom: 1.5rem;
+}
+
+@media (max-width: 56em) {
+  .slds-modal__container {
+    padding-top: 12rem;
+  }
+}
+
+.slds-backdrop {
+  animation: fade-in var(--fc-dur-fast) var(--fc-ease-out) backwards;
+}
+
+/* A decided request slides aside and closes up before it goes. */
+.request-leaving {
+  overflow: hidden;
+  pointer-events: none;
+  animation: leave 360ms var(--fc-ease-inout) forwards;
+}
+
+@keyframes leave {
+  from {
+    max-height: 30rem;
+  }
+  45% {
+    opacity: 0;
+    transform: translateX(1rem);
+    max-height: 30rem;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(1rem);
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-width: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .request,
+  .request-leaving,
+  .empty,
+  .slds-modal__container,
+  .slds-backdrop {
+    animation: none;
+  }
+  .tab,
+  .request,
+  .results .requests,
+  .results .empty {
+    transition: none;
+  }
+}
+
+.dialog-text {
+  padding-bottom: 0.75rem;
+}

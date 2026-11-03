@@ -1,0 +1,495 @@
+<template>
+  <div class="page" onkeydown={handleModalKey}>
+    <header class="header">
+      <div class="title">
+        <lightning-icon
+          icon-name="standard:entitlement_policy"
+          size="medium"
+          alternative-text=""
+        ></lightning-icon>
+        <div>
+          <h1>Governed Flows</h1>
+          <p class="subtitle">
+            Each governed flow has an owner who approves its activations.
+            <span class="count">{countText}</span>
+          </p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <lightning-input
+          class="search"
+          type="search"
+          label="Search governed flows"
+          variant="label-hidden"
+          placeholder="Search by flow, owner or org"
+          value={search}
+          onchange={handleSearch}
+        ></lightning-input>
+        <lightning-button-icon
+          icon-name="utility:refresh"
+          variant="border-filled"
+          alternative-text="Refresh"
+          title="Refresh"
+          onclick={handleRefresh}
+        ></lightning-button-icon>
+        <template lwc:if={isAdmin}>
+          <lightning-button
+            class="run-check"
+            label="Run check now"
+            icon-name="utility:shield"
+            disabled={checking}
+            onclick={handleRunCheck}
+          ></lightning-button>
+          <lightning-button
+            class="add"
+            variant="brand"
+            label="Govern a flow"
+            icon-name="utility:add"
+            onclick={handleAdd}
+          ></lightning-button>
+        </template>
+        <c-flow-help topic="govern"></c-flow-help>
+        <c-flow-help-toggle></c-flow-help-toggle>
+      </div>
+    </header>
+
+    <template lwc:if={checks}>
+      <div class={checksClass} role="status">
+        <span class={checks.badgeClass}>{checks.state}</span>
+        <span class="checks-text">{checks.text}</span>
+        <span class="meta"
+          >Checks every governed flow, 25 at a time, watched and enforced flows
+          first.</span
+        >
+        <template lwc:if={isAdmin}>
+          <a class="checks-link" href={checksUrl} onclick={handleOpenChecks}
+            >Automatic check settings</a
+          >
+        </template>
+      </div>
+    </template>
+
+    <template lwc:if={error}>
+      <div class="error" role="alert">
+        <span class="error-text">{error}</span>
+        <lightning-button-icon
+          icon-name="utility:close"
+          variant="bare"
+          alternative-text="Dismiss"
+          onclick={handleDismissError}
+        ></lightning-button-icon>
+      </div>
+    </template>
+
+    <template lwc:if={checking}>
+      <p class="checking">
+        <lightning-spinner
+          alternative-text="Checking"
+          size="x-small"
+        ></lightning-spinner>
+        Waiting for the queued check…
+      </p>
+    </template>
+
+    <template lwc:if={hasCheckResults}>
+      <section class="check-results" aria-label="Check results">
+        <div class="section-head">
+          <h2>Check results</h2>
+          <lightning-button-icon
+            icon-name="utility:close"
+            variant="bare"
+            alternative-text="Close check results"
+            onclick={handleCloseCheck}
+          ></lightning-button-icon>
+        </div>
+        <template lwc:if={checkEmpty}>
+          <p class="meta">No flows are governed yet.</p>
+        </template>
+        <ul>
+          <template for:each={checkItems} for:item="item">
+            <li key={item.key} class={item.itemClass}>
+              <lightning-icon
+                icon-name={item.icon}
+                size="xx-small"
+                alternative-text=""
+              ></lightning-icon>
+              <strong>{item.name}</strong>
+              <span class="meta">{item.connectionLabel}</span>
+              <span class="check-text">{item.text}</span>
+            </li>
+          </template>
+        </ul>
+      </section>
+    </template>
+
+    <template lwc:if={loading}>
+      <div class="loading">
+        <lightning-spinner
+          alternative-text="Loading"
+          size="small"
+        ></lightning-spinner>
+      </div>
+    </template>
+
+    <template lwc:if={showEmpty}>
+      <div class="empty">
+        <lightning-icon
+          icon-name="utility:lock"
+          size="small"
+          alternative-text=""
+        ></lightning-icon>
+        <p>No flows are governed yet.</p>
+        <template lwc:if={isAdmin}>
+          <p class="meta">
+            Govern a flow to give it an owner who approves its activations.
+          </p>
+        </template>
+      </div>
+    </template>
+
+    <template lwc:if={noMatches}>
+      <p class="meta no-matches">No governed flows match “{search}”.</p>
+    </template>
+
+    <template lwc:if={hasRows}>
+      <table
+        class="slds-table slds-table_cell-buffer slds-table_bordered slds-max-medium-table_stacked governed"
+      >
+        <thead>
+          <tr class="slds-line-height_reset">
+            <th scope="col">Flow</th>
+            <th scope="col">Org</th>
+            <th scope="col">Owner</th>
+            <th scope="col">Mode</th>
+            <th scope="col">Approved</th>
+            <th scope="col">Active</th>
+            <th scope="col">Last checked</th>
+            <th scope="col">
+              <span class="slds-assistive-text">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <template for:each={rows} for:item="row">
+            <tr key={row.id} class={row.rowClass} aria-selected={row.selected}>
+              <th scope="row" data-label="Flow">
+                <div class="flow-name">{row.label}</div>
+                <div class="meta api-name">{row.apiName}</div>
+              </th>
+              <td data-label="Org">{row.connectionLabel}</td>
+              <td class="owner" data-label="Owner">{row.ownerText}</td>
+              <td data-label="Mode">
+                <span class={row.modeClass}>{row.modeText}</span>
+              </td>
+              <td data-label="Approved">{row.approvedText}</td>
+              <td data-label="Active">
+                <span class="active">{row.activeText}</span>
+                <template lwc:if={row.drift}>
+                  <lightning-icon
+                    class="drift"
+                    icon-name="utility:warning"
+                    variant="warning"
+                    size="xx-small"
+                    alternative-text="Not the approved version"
+                    title="Not the approved version; the next check reverts it unless it's accepted."
+                  ></lightning-icon>
+                </template>
+              </td>
+              <td class="checked" data-label="Last checked">
+                <div>{row.checkedText}</div>
+                <template lwc:if={row.lastCheckText}>
+                  <div class={row.lastCheckClass}>{row.lastCheckText}</div>
+                </template>
+              </td>
+              <td class="row-actions">
+                <lightning-button
+                  class="compare"
+                  variant="base"
+                  label="Compare"
+                  title="Compare this flow's versions"
+                  aria-label={row.compareText}
+                  data-id={row.id}
+                  onclick={handleCompare}
+                ></lightning-button>
+                <lightning-button
+                  class="history"
+                  variant="base"
+                  label="History"
+                  title="Show this flow's history"
+                  aria-label={row.historyText}
+                  data-id={row.id}
+                  onclick={handleHistory}
+                ></lightning-button>
+                <template lwc:if={isAdmin}>
+                  <lightning-button-menu
+                    class="row-menu"
+                    icon-name="utility:down"
+                    icon-size="x-small"
+                    menu-alignment="right"
+                    alternative-text={row.menuText}
+                    title={row.menuText}
+                    data-id={row.id}
+                    onselect={handleRowMenu}
+                  >
+                    <lightning-menu-item
+                      value="edit"
+                      label="Edit governance"
+                    ></lightning-menu-item>
+                    <lightning-menu-item
+                      value="remove"
+                      label="Stop governing"
+                    ></lightning-menu-item>
+                  </lightning-button-menu>
+                </template>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </template>
+
+    <section
+      class={historyClass}
+      aria-label={historyTitle}
+      aria-busy={historyBusy}
+    >
+      <div class="section-head">
+        <div class="history-heading">
+          <h2 class="history-title" tabindex="-1">
+            {historyTitle}
+            <template lwc:if={eventsLoading}>
+              <span class="history-loading">Loading…</span>
+            </template>
+          </h2>
+          <c-flow-help topic="history"></c-flow-help>
+        </div>
+        <template lwc:if={showAllHistory}>
+          <lightning-button
+            class="all-history"
+            variant="base"
+            label="Show all activity"
+            onclick={handleAllHistory}
+          ></lightning-button>
+        </template>
+      </div>
+      <template lwc:if={eventsError}>
+        <p class="error">{eventsError}</p>
+      </template>
+      <template lwc:if={showHistoryEmpty}>
+        <p class="meta history-empty">{historyEmptyText}</p>
+      </template>
+      <template for:each={historyGroups} for:item="group">
+        <div key={group.key} class="day">
+          <h3 class="day-head">{group.label}</h3>
+          <ol class="events">
+            <template for:each={group.items} for:item="item">
+              <li key={item.id} class={item.itemClass}>
+                <lightning-icon
+                  icon-name={item.icon}
+                  size="xx-small"
+                  alternative-text=""
+                ></lightning-icon>
+                <div class="event-body">
+                  <div class="event-line">
+                    <strong class="event-type">{item.type}</strong>
+                    <template lwc:if={item.flowText}>
+                      <button
+                        class="slds-button event-flow"
+                        title="Show this flow's history"
+                        data-key={item.flowKey}
+                        onclick={handleEventFlow}
+                      >
+                        {item.flowText}
+                      </button>
+                    </template>
+                    <span>{item.version}</span>
+                    <span class="meta">{item.actor}</span>
+                  </div>
+                  <template lwc:if={item.details}>
+                    <div class="event-details">
+                      <template for:each={item.details} for:item="block">
+                        <div key={block.key} class="detail-block">
+                          <p>{block.text}</p>
+                          <template lwc:if={block.hasItems}>
+                            <ul class="detail-items">
+                              <template for:each={block.items} for:item="line">
+                                <li key={line.key}>{line.text}</li>
+                              </template>
+                            </ul>
+                          </template>
+                        </div>
+                      </template>
+                    </div>
+                  </template>
+                </div>
+                <time
+                  class="meta"
+                  datetime={item.datetime}
+                  title={item.whenFull}
+                  >{item.when}</time
+                >
+              </li>
+            </template>
+          </ol>
+        </div>
+      </template>
+      <template lwc:if={hasOlder}>
+        <div class="older">
+          <lightning-button
+            class="older-history"
+            label={olderLabel}
+            onclick={handleOlder}
+          ></lightning-button>
+        </div>
+      </template>
+    </section>
+
+    <template lwc:if={editorOpen}>
+      <span class="focus-guard" tabindex="0" onfocus={handleFocusLast}></span>
+      <section
+        class="slds-modal slds-fade-in-open editor"
+        role="dialog"
+        tabindex="-1"
+        aria-modal="true"
+        aria-labelledby="editor-title"
+      >
+        <div class="slds-modal__container">
+          <header class="slds-modal__header modal-header">
+            <lightning-button-icon
+              class="close"
+              icon-name="utility:close"
+              variant="bare"
+              size="large"
+              alternative-text="Close"
+              title="Close"
+              disabled={saving}
+              onclick={handleEditorClose}
+            ></lightning-button-icon>
+            <h2 id="editor-title" class="slds-modal__title">{editorTitle}</h2>
+          </header>
+          <div class="slds-modal__content slds-p-around_medium form">
+            <template lwc:if={editor.isNew}>
+              <lightning-combobox
+                class="editor-connection"
+                label="Org"
+                options={connectionOptions}
+                value={editor.connection}
+                onchange={handleEditorConnection}
+              ></lightning-combobox>
+              <c-flow-picker
+                class="editor-flow"
+                label="Flow"
+                required
+                options={editorFlowOptions}
+                value={editor.apiName}
+                placeholder={editorFlowPlaceholder}
+                disabled={editorFlowDisabled}
+                onchange={handleEditorFlow}
+              ></c-flow-picker>
+            </template>
+            <lightning-record-picker
+              class="editor-owner"
+              label="Owner"
+              object-api-name="User"
+              placeholder="Search people"
+              required
+              value={editor.ownerId}
+              filter={ownerFilter}
+              onchange={handleEditorOwner}
+            ></lightning-record-picker>
+            <template lwc:if={ownerHint}>
+              <p class="meta">{ownerHint}</p>
+            </template>
+            <lightning-radio-group
+              class="editor-mode"
+              label="Mode"
+              type="button"
+              options={modeOptions}
+              value={editor.mode}
+              onchange={handleEditorMode}
+            ></lightning-radio-group>
+            <p class="mode-description">{editorModeDescription}</p>
+            <template lwc:if={editorChecksWarning}>
+              <p class="checks-warning" role="status">{editorChecksWarning}</p>
+            </template>
+            <template lwc:if={editor.isNew}>
+              <p class="meta">
+                The version active now becomes the approved version.
+              </p>
+            </template>
+            <template lwc:if={editorError}>
+              <p class="error" role="alert">{editorError}</p>
+            </template>
+          </div>
+          <footer class="slds-modal__footer">
+            <lightning-button
+              label="Cancel"
+              disabled={saving}
+              onclick={handleEditorClose}
+            ></lightning-button>
+            <lightning-button
+              class="editor-save slds-m-left_x-small"
+              variant="brand"
+              label="Save"
+              disabled={saveDisabled}
+              onclick={handleEditorSave}
+            ></lightning-button>
+          </footer>
+        </div>
+      </section>
+      <span class="focus-guard" tabindex="0" onfocus={handleFocusFirst}></span>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <template lwc:if={removeOpen}>
+      <span class="focus-guard" tabindex="0" onfocus={handleFocusLast}></span>
+      <section
+        class="slds-modal slds-fade-in-open remove-dialog"
+        role="alertdialog"
+        tabindex="-1"
+        aria-modal="true"
+        aria-labelledby="remove-title"
+      >
+        <div class="slds-modal__container">
+          <header class="slds-modal__header modal-header">
+            <lightning-button-icon
+              class="close"
+              icon-name="utility:close"
+              variant="bare"
+              size="large"
+              alternative-text="Close"
+              title="Close"
+              disabled={saving}
+              onclick={handleRemoveClose}
+            ></lightning-button-icon>
+            <h2 id="remove-title" class="slds-modal__title">
+              Stop governing this flow?
+            </h2>
+          </header>
+          <div class="slds-modal__content slds-p-around_medium">
+            <p class="remove-text">{removeText}</p>
+            <template lwc:if={removeError}>
+              <p class="error" role="alert">{removeError}</p>
+            </template>
+          </div>
+          <footer class="slds-modal__footer">
+            <lightning-button
+              label="Cancel"
+              disabled={saving}
+              onclick={handleRemoveClose}
+            ></lightning-button>
+            <lightning-button
+              class="remove-confirm slds-m-left_x-small"
+              variant="destructive"
+              label="Stop governing"
+              disabled={saving}
+              onclick={handleRemoveConfirm}
+            ></lightning-button>
+          </footer>
+        </div>
+      </section>
+      <span class="focus-guard" tabindex="0" onfocus={handleFocusFirst}></span>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+  </div>
+</template>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Last_Attempt__c</fullName>
+    <description
+  >Fair scheduling includes failed checks, without losing the successful-check audit lookback.</description>
+    <label>Last Check Attempt</label>
+    <type>DateTime</type>
+</CustomField>

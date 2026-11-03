@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Replaces_Version__c</fullName>
+    <description
+  >The version that was active when this was requested (0 for none). Approval is refused if another version has been activated since, so an old request cannot roll back a newer choice.</description>
+    <externalId>false</externalId>
+    <label>Replaces Version</label>
+    <precision>6</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

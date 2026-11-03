@@ -1,0 +1,183 @@
+<template>
+  <div class={frameClass} onkeydown={handleFrameKey}>
+    <template lwc:if={finding}>
+      <div class="find" role="search">
+        <lightning-icon
+          class="find-icon"
+          icon-name="utility:search"
+          size="x-small"
+          alternative-text=""
+        ></lightning-icon>
+        <input
+          lwc:ref="find"
+          class="find-input"
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Find an element"
+          aria-label="Find an element by name or type"
+          value={findText}
+          oninput={handleFindInput}
+          onkeydown={handleFindKey}
+        />
+        <span class="find-count" aria-live="polite">{findCount}</span>
+        <lightning-button-icon
+          class="find-previous"
+          icon-name="utility:chevronup"
+          variant="bare"
+          alternative-text="Previous match"
+          title="Previous match (Shift+Enter)"
+          disabled={noMatches}
+          onclick={findPrevious}
+        ></lightning-button-icon>
+        <lightning-button-icon
+          class="find-next"
+          icon-name="utility:chevrondown"
+          variant="bare"
+          alternative-text="Next match"
+          title="Next match (Enter)"
+          disabled={noMatches}
+          onclick={findNext}
+        ></lightning-button-icon>
+        <lightning-button-icon
+          class="find-close"
+          icon-name="utility:close"
+          variant="bare"
+          alternative-text="Close find"
+          title="Close (Esc)"
+          onclick={closeFind}
+        ></lightning-button-icon>
+      </div>
+    </template>
+    <div class="toolbar">
+      <lightning-button-icon
+        class="find-open"
+        icon-name="utility:search"
+        alternative-text="Find an element"
+        title="Find an element (/)"
+        disabled={isEmpty}
+        onclick={openFind}
+      ></lightning-button-icon>
+      <lightning-button-group>
+        <lightning-button-icon
+          icon-name="utility:dash"
+          alternative-text="Zoom out"
+          title="Zoom out"
+          onclick={zoomOut}
+        ></lightning-button-icon>
+        <lightning-button-icon
+          icon-name="utility:add"
+          alternative-text="Zoom in"
+          title="Zoom in"
+          onclick={zoomIn}
+        ></lightning-button-icon>
+        <lightning-button-icon
+          icon-name="utility:contract_alt"
+          alternative-text="Fit to view"
+          title="Fit to view"
+          onclick={handleFit}
+        ></lightning-button-icon>
+      </lightning-button-group>
+      <span class="zoom" aria-live="polite">{zoomText}</span>
+    </div>
+    <div
+      class={viewportClass}
+      lwc:ref="viewport"
+      style={viewportStyle}
+      tabindex="0"
+      role="application"
+      aria-label={ariaLabel}
+      onpointerdown={handlePointerDown}
+      onpointermove={handlePointerMove}
+      onpointerup={handlePointerUp}
+      onpointercancel={handlePointerUp}
+      onkeydown={handleKeyDown}
+    >
+      <div
+        class={worldClass}
+        style={worldStyle}
+        ontransitionend={handleGlideEnd}
+      >
+        <svg
+          class="edges"
+          style={svgStyle}
+          width={svgWidth}
+          height={svgHeight}
+          aria-hidden="true"
+        >
+          <g transform={svgTransform}>
+            <template for:each={edges} for:item="edge">
+              <g key={edge.id} class={edge.className}>
+                <path d={edge.d} class="edge-line"></path>
+                <polygon points={edge.arrow} class="edge-arrow"></polygon>
+              </g>
+            </template>
+          </g>
+        </svg>
+        <template for:each={edgeLabels} for:item="edge">
+          <span key={edge.id} class={edge.labelClass} style={edge.labelStyle}
+            >{edge.label}</span
+          >
+        </template>
+        <template for:each={nodes} for:item="node">
+          <div
+            key={node.id}
+            class={node.className}
+            style={node.style}
+            data-id={node.id}
+            role="button"
+            tabindex={node.tabIndex}
+            aria-label={node.ariaLabel}
+            aria-pressed={node.pressed}
+            onfocus={handleNodeFocus}
+            onclick={handleNodeClick}
+            onkeydown={handleNodeKey}
+          >
+            <div class="tile">
+              <template lwc:if={node.statusGlyph}>
+                <span
+                  class="state-glyph"
+                  aria-hidden="true"
+                  title={node.statusTitle}
+                  >{node.statusGlyph}</span
+                >
+              </template>
+              <lightning-icon
+                icon-name={node.icon}
+                size="large"
+                class="tile-icon"
+              ></lightning-icon>
+              <div class="badges" aria-hidden="true">
+                <template for:each={node.badges} for:item="badge">
+                  <span
+                    key={badge.key}
+                    class={badge.className}
+                    title={badge.title}
+                    >{badge.text}</span
+                  >
+                </template>
+              </div>
+              <template lwc:if={node.moved}>
+                <span class="moved" title="Moved on the canvas">
+                  <lightning-icon
+                    icon-name="utility:move"
+                    size="xx-small"
+                    alternative-text="Moved"
+                  ></lightning-icon>
+                </span>
+              </template>
+            </div>
+            <div class="label" title={node.label}>{node.label}</div>
+            <div class="type" title={node.typeLabel}>{node.typeLabel}</div>
+            <template lwc:if={node.pickLabel}>
+              <span class="pick" title={node.pickTitle}>{node.pickLabel}</span>
+            </template>
+          </div>
+        </template>
+      </div>
+      <template lwc:if={isEmpty}>
+        <div class="empty">{emptyMessage}</div>
+      </template>
+    </div>
+  </div>
+</template>

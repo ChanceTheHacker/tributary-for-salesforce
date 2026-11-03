@@ -1,0 +1,11 @@
+@import "c/flowTokens";
+
+:host {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
+.help {
+  --slds-c-icon-color-foreground: var(--fc-help-color, var(--fc-brand));
+}

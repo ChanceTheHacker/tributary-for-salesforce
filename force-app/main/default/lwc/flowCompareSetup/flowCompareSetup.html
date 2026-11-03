@@ -1,0 +1,505 @@
+<template>
+  <div class="page">
+    <header class="header">
+      <div class="title">
+        <lightning-icon
+          icon-name="standard:settings"
+          size="medium"
+          alternative-text=""
+        ></lightning-icon>
+        <div>
+          <h1>Tributary Setup</h1>
+          <p class={summaryClass} role="status">{summaryText}</p>
+          <template lwc:if={showWarnings}>
+            <ul class="warnings">
+              <template for:each={warnings} for:item="warning">
+                <li key={warning.key}>
+                  <button
+                    class="slds-button warning-link"
+                    data-key={warning.key}
+                    onclick={handleWarning}
+                  >
+                    <lightning-icon
+                      icon-name="utility:warning"
+                      variant="warning"
+                      size="xx-small"
+                      alternative-text=""
+                    ></lightning-icon>
+                    {warning.text}
+                  </button>
+                </li>
+              </template>
+            </ul>
+          </template>
+        </div>
+      </div>
+      <div class="header-actions">
+        <template lwc:if={canOpenCompare}>
+          <lightning-button
+            class="open-compare"
+            variant="neutral"
+            label="Compare flows"
+            onclick={handleOpenCompare}
+          ></lightning-button>
+        </template>
+        <lightning-button-icon
+          icon-name="utility:refresh"
+          variant="border-filled"
+          alternative-text="Check again"
+          title="Check again"
+          onclick={handleRefresh}
+        ></lightning-button-icon>
+        <c-flow-help-toggle></c-flow-help-toggle>
+      </div>
+    </header>
+
+    <template lwc:if={loading}>
+      <div class="loading">
+        <lightning-spinner
+          alternative-text="Checking the setup"
+          size="small"
+        ></lightning-spinner>
+      </div>
+    </template>
+
+    <template lwc:if={error}>
+      <p class="error" role="alert">{error}</p>
+    </template>
+
+    <template lwc:if={notAdmin}>
+      <p class="notice">
+        Only Tributary admins can change the setup. Ask an admin to fix anything
+        marked below.
+      </p>
+    </template>
+
+    <template lwc:if={ready}>
+      <section class="card" aria-labelledby="steps-title">
+        <div class="section-head">
+          <h2 id="steps-title">Connection to this org</h2>
+          <template lwc:if={canGuide}>
+            <lightning-button
+              class="guide-open"
+              label="Set up step by step"
+              icon-name="utility:steps"
+              onclick={handleGuideOpen}
+            ></lightning-button>
+          </template>
+        </div>
+        <p class="meta">
+          Tributary reads and activates flows through the Tooling API, signing
+          in with an external client app's client credentials.
+        </p>
+        <p class="meta credential-visibility">
+          Before signing in, Tributary must read both credential destinations as
+          the person using the app. If either cannot be verified, the local
+          connection is blocked without sending credentials. An admin may
+          separately grant View Setup and Configuration where appropriate;
+          Tributary does not grant this broader setup access automatically.
+        </p>
+        <template lwc:if={guiding}>
+          <nav class="guide-nav" aria-label="Setup steps">
+            <ol>
+              <template for:each={guideSteps} for:item="item">
+                <li key={item.key} class={item.navClass}>
+                  <button
+                    class="slds-button guide-nav-step"
+                    data-index={item.index}
+                    aria-current={item.ariaCurrent}
+                    onclick={handleGuideJump}
+                  >
+                    <span class="guide-mark">
+                      <template lwc:if={item.done}>
+                        <lightning-icon
+                          icon-name="utility:check"
+                          size="xx-small"
+                          alternative-text="Done:"
+                        ></lightning-icon>
+                      </template>
+                      <template lwc:else>{item.number}</template>
+                    </span>
+                    <span class="guide-nav-label">{item.label}</span>
+                  </button>
+                </li>
+              </template>
+            </ol>
+          </nav>
+          <template for:each={guideCurrent} for:item="current">
+            <div key={current.key} class="guide-body" data-guide={current.key}>
+              <p class="meta guide-count">{current.countText}</p>
+              <h3 class="guide-title" tabindex="-1">{current.title}</h3>
+
+              <template lwc:if={current.isApp}>
+                <p>
+                  Tributary signs in to this org as an external client app, so
+                  nobody has to authorize it. In Setup, in another tab:
+                </p>
+                <ol class="guide-instructions">
+                  <li>
+                    Open <strong>App Manager</strong> and click
+                    <strong>New External Client App</strong>. Give it a name and
+                    a contact email, and leave
+                    <strong>Distribution State</strong> as Local. (An org that
+                    can still create connected apps can use one instead, with
+                    the same settings.)
+                  </li>
+                  <li>
+                    Under <strong>API (Enable OAuth Settings)</strong>, turn on
+                    OAuth, add the
+                    <strong>Manage user data via APIs (api)</strong> scope and
+                    enter any callback URL, such as
+                    <code
+                      >https://login.salesforce.com/services/oauth2/success</code
+                    >. Tick <strong>Enable Client Credentials Flow</strong> and
+                    create the app.
+                  </li>
+                  <li>
+                    On its <strong>Policies</strong> tab, click
+                    <strong>Edit</strong>, tick
+                    <strong>Enable Client Credentials Flow</strong> and set
+                    <strong>Run As</strong> to an integration user with Manage
+                    Flow, Modify Metadata Through Metadata API Functions and
+                    View Setup and Configuration. Save.
+                  </li>
+                  <li>
+                    On its <strong>Settings</strong> tab, open
+                    <strong>OAuth Settings</strong>, then
+                    <strong>Consumer Key and Secret</strong>, and keep them for
+                    step 3.
+                  </li>
+                </ol>
+                <a
+                  class="app-manager"
+                  href="/lightning/setup/NavigationMenus/home"
+                  target="_blank"
+                  rel="noopener"
+                  >Open App Manager in a new tab<lightning-icon
+                    icon-name="utility:new_window"
+                    size="xx-small"
+                    alternative-text=""
+                  ></lightning-icon
+                ></a>
+                <template lwc:if={current.done}>
+                  <p class="meta">
+                    Already done: a consumer key and secret are stored.
+                  </p>
+                </template>
+              </template>
+
+              <template lwc:if={current.check}>
+                <div class={current.stateClass}>
+                  <lightning-icon
+                    icon-name={current.check.icon}
+                    variant={current.check.iconVariant}
+                    size="x-small"
+                    alternative-text={current.check.iconText}
+                  ></lightning-icon>
+                  <p class="guide-detail">{current.check.detail}</p>
+                </div>
+                <template lwc:if={current.help}>
+                  <p class="meta">{current.help}</p>
+                </template>
+                <template lwc:if={current.showFix}>
+                  <div>
+                    <lightning-button
+                      class="guide-fix"
+                      label={current.check.fix}
+                      variant={current.check.fixVariant}
+                      data-action={current.check.action}
+                      disabled={current.check.busy}
+                      onclick={handleFix}
+                    ></lightning-button>
+                  </div>
+                </template>
+              </template>
+
+              <template lwc:if={current.isMonitor}>
+                <p class="guide-detail">{guideMonitorText}</p>
+                <div class="monitor-actions">
+                  <lightning-combobox
+                    class="interval guide-interval"
+                    label="How often"
+                    variant="label-hidden"
+                    options={intervalOptions}
+                    value={interval}
+                    onchange={handleInterval}
+                  ></lightning-combobox>
+                  <lightning-button
+                    class="guide-start"
+                    variant="brand"
+                    label={startLabel}
+                    disabled={monitorBusy}
+                    onclick={handleStartMonitor}
+                  ></lightning-button>
+                </div>
+                <p class="meta">{checksNote}</p>
+              </template>
+            </div>
+          </template>
+        </template>
+        <template lwc:else>
+          <ol class="steps">
+            <template for:each={steps} for:item="step">
+              <li key={step.key} class={step.itemClass} data-step={step.key}>
+                <lightning-icon
+                  icon-name={step.icon}
+                  variant={step.iconVariant}
+                  size="x-small"
+                  alternative-text={step.iconText}
+                ></lightning-icon>
+                <div class="step-body">
+                  <h3 class="step-title" tabindex="-1">{step.title}</h3>
+                  <p class="step-detail">{step.detail}</p>
+                </div>
+                <template lwc:if={step.showFix}>
+                  <lightning-button
+                    class="fix"
+                    label={step.fix}
+                    variant={step.fixVariant}
+                    data-action={step.action}
+                    disabled={step.busy}
+                    onclick={handleFix}
+                  ></lightning-button>
+                </template>
+              </li>
+            </template>
+          </ol>
+        </template>
+
+        <template lwc:if={showCredentialForm}>
+          <div class="credential-form">
+            <p class="meta">
+              From the external client app's Consumer Key and Secret page. The
+              secret is stored encrypted in the credential and never shown
+              again.
+            </p>
+            <lightning-input
+              class="client-id"
+              label="Consumer key"
+              value={clientId}
+              autocomplete="off"
+              required
+              onchange={handleClientId}
+            ></lightning-input>
+            <lightning-input
+              class="client-secret"
+              type="password"
+              label="Consumer secret"
+              value={clientSecret}
+              autocomplete="new-password"
+              required
+              onchange={handleClientSecret}
+            ></lightning-input>
+            <template lwc:if={credentialError}>
+              <p class="error" role="alert">{credentialError}</p>
+            </template>
+            <div class="form-actions">
+              <lightning-button
+                label="Cancel"
+                onclick={handleCredentialCancel}
+              ></lightning-button>
+              <lightning-button
+                class="save-credentials"
+                variant="brand"
+                label="Save credentials"
+                disabled={credentialSaveDisabled}
+                onclick={handleCredentialSave}
+              ></lightning-button>
+            </div>
+          </div>
+        </template>
+
+        <template lwc:if={guiding}>
+          <div class="guide-footer">
+            <lightning-button
+              class="guide-close"
+              variant="base"
+              label="Close guide"
+              onclick={handleGuideClose}
+            ></lightning-button>
+            <div class="guide-moves">
+              <lightning-button
+                class="guide-back"
+                label="Back"
+                disabled={guideFirst}
+                onclick={handleGuideBack}
+              ></lightning-button>
+              <lightning-button
+                class="guide-next"
+                variant="brand"
+                label={guideNextLabel}
+                onclick={handleGuideNext}
+              ></lightning-button>
+            </div>
+          </div>
+        </template>
+      </section>
+
+      <section class="card" aria-labelledby="orgs-title">
+        <div class="section-head">
+          <h2 id="orgs-title">Orgs</h2>
+          <lightning-button
+            class="test-all"
+            label="Test all"
+            onclick={handleTestAll}
+          ></lightning-button>
+        </div>
+        <template lwc:if={hasOtherOrgs}>
+          <p class="meta">
+            Other orgs are connections defined in the Flow Connection custom
+            metadata type, each with its own named credential.
+          </p>
+        </template>
+        <template lwc:else>
+          <p class="meta">
+            To compare flows across orgs, add a named credential for the other
+            org and a Flow Connection custom metadata record that names it.
+          </p>
+        </template>
+        <p class="meta other-org-access">{otherOrgAccessText}</p>
+        <ul class="connections">
+          <template for:each={connectionRows} for:item="row">
+            <li key={row.name} class="connection" data-name={row.name}>
+              <div class="connection-name">
+                <strong>{row.label}</strong>
+                <template lwc:if={row.showKind}>
+                  <span class="meta">{row.kind}</span>
+                </template>
+                <template lwc:if={row.description}>
+                  <span class="meta">{row.description}</span>
+                </template>
+              </div>
+              <span class={row.stateClass}>{row.stateText}</span>
+              <lightning-button
+                class="test"
+                label="Test"
+                data-name={row.name}
+                disabled={row.testing}
+                onclick={handleTest}
+              ></lightning-button>
+              <template lwc:if={row.message}>
+                <p class="connection-message">{row.message}</p>
+              </template>
+            </li>
+          </template>
+        </ul>
+      </section>
+
+      <section
+        class={monitorClass}
+        data-section="monitor"
+        aria-labelledby="monitor-title"
+      >
+        <div class="section-head">
+          <h2 id="monitor-title" tabindex="-1">Automatic checks</h2>
+          <span class={checks.badgeClass}>{checks.state}</span>
+        </div>
+        <p class="meta">
+          Each check compares every governed flow's active version with its
+          approved one and reverts unapproved outside activations. It works
+          through the list 25 flows per job, watched and enforced flows first; a
+          flow it couldn't reach, or one an activation is under way for, is left
+          for the next check.
+        </p>
+        <p class="monitor-text">{monitorText}</p>
+        <template lwc:if={lastRunText}>
+          <p class="meta last-run">{lastRunText}</p>
+        </template>
+        <template lwc:if={monitor.lastError}>
+          <p class="error">{monitor.lastError}</p>
+        </template>
+        <p class="meta counts">{countsText}</p>
+        <template lwc:if={isAdmin}>
+          <div class="monitor-actions">
+            <lightning-combobox
+              class="interval"
+              label="How often"
+              variant="label-hidden"
+              options={intervalOptions}
+              value={interval}
+              onchange={handleInterval}
+            ></lightning-combobox>
+            <lightning-button
+              class="start-monitor"
+              variant="brand"
+              label={startLabel}
+              disabled={monitorBusy}
+              onclick={handleStartMonitor}
+            ></lightning-button>
+            <template lwc:if={canRunCheck}>
+              <lightning-button
+                class="run-check"
+                label="Run check now"
+                icon-name="utility:shield"
+                disabled={monitorBusy}
+                onclick={handleRunCheck}
+              ></lightning-button>
+            </template>
+            <template lwc:if={monitor.scheduled}>
+              <lightning-button
+                class="stop-monitor"
+                variant="destructive-text"
+                label="Stop"
+                disabled={monitorBusy}
+                onclick={handleStopMonitor}
+              ></lightning-button>
+            </template>
+          </div>
+          <template lwc:if={checking}>
+            <p class="meta checking" role="status">
+              Waiting for the queued check…
+            </p>
+          </template>
+          <template lwc:if={confirmingStop}>
+            <div class="stop-confirm" role="group" aria-label="Stop checks">
+              <p>
+                Stop automatic checks? Until they start again, activations made
+                outside Tributary stay until someone runs a check.
+              </p>
+              <div class="stop-confirm-actions">
+                <lightning-button
+                  class="stop-cancel"
+                  label="Keep checking"
+                  disabled={monitorBusy}
+                  onclick={handleStopCancel}
+                ></lightning-button>
+                <lightning-button
+                  class="stop-confirm-button"
+                  variant="destructive"
+                  label="Stop checks"
+                  disabled={monitorBusy}
+                  onclick={handleStopConfirm}
+                ></lightning-button>
+              </div>
+            </div>
+          </template>
+          <p class="meta">{checksNote}</p>
+        </template>
+      </section>
+
+      <section class="card" aria-labelledby="permsets-title">
+        <h2 id="permsets-title">Permission sets</h2>
+        <p class="meta">
+          Tributary User can compare and merge flows, save merged versions and
+          request activations. Tributary Admin can also govern flows, approve
+          any activation and change this setup.
+        </p>
+        <ul class="permission-sets">
+          <template for:each={permissionSetRows} for:item="row">
+            <li key={row.id} class="permission-set">
+              <strong>{row.label}</strong>
+              <span class="meta">{row.assignedText}</span>
+              <span class={row.accessClass}>{row.accessText}</span>
+              <lightning-button
+                variant="base"
+                label="Manage assignments"
+                data-id={row.id}
+                onclick={handleOpenPermissionSet}
+              ></lightning-button>
+            </li>
+          </template>
+        </ul>
+      </section>
+    </template>
+  </div>
+</template>

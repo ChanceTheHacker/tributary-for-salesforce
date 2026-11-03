@@ -1,0 +1,256 @@
+@import "c/flowTokens";
+
+:host {
+  display: block;
+}
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+.count {
+  font-weight: 700;
+}
+
+.edit {
+  margin-left: auto;
+}
+
+.status {
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.25rem;
+  margin-bottom: 0.5rem;
+  transition:
+    background-color var(--fc-dur) ease,
+    color var(--fc-dur) ease;
+}
+.status-ok {
+  background: var(--fc-canopy-95);
+  color: var(--fc-canopy-30);
+}
+.status-warning {
+  background: var(--fc-gold-95);
+  color: var(--fc-gold-30);
+}
+.status-error {
+  background: var(--fc-macaw-95);
+  color: var(--fc-macaw-30);
+}
+
+.auto {
+  color: var(--fc-ink-40);
+  margin-bottom: 0.5rem;
+}
+
+.more-changes {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.change {
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--fc-ink-90);
+  border-radius: 0.25rem;
+  overflow: hidden;
+  transition:
+    border-color var(--fc-dur) ease,
+    box-shadow var(--fc-dur) ease;
+  animation: rise-in var(--fc-dur) var(--fc-ease-out) backwards;
+}
+
+.change.unresolved {
+  border-color: var(--fc-macaw-40);
+  box-shadow: inset 3px 0 0 var(--fc-macaw-40);
+}
+
+.change-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  background: var(--fc-ink-95);
+}
+
+.element {
+  font-family: Consolas, Menlo, Monaco, monospace;
+  font-size: 0.75rem;
+  color: var(--fc-ink-30);
+}
+
+.pick {
+  margin-left: auto;
+}
+
+.hint {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  color: var(--fc-ink-40);
+  border-bottom: 1px solid var(--fc-ink-90);
+}
+
+.fold {
+  margin: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+}
+
+.column + .column {
+  border-left: 1px solid var(--fc-ink-90);
+}
+
+.column-head {
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--fc-ink-40);
+  border-bottom: 1px solid var(--fc-ink-90);
+}
+
+.line {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  font-family: Consolas, Menlo, Monaco, monospace;
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+}
+
+.no {
+  padding-right: 0.5rem;
+  text-align: right;
+  color: var(--fc-ink-60);
+}
+
+.text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.del {
+  background: var(--fc-macaw-95);
+}
+.ins {
+  background: var(--fc-canopy-95);
+}
+/* Match the comparison header: A is neutral, B is river; amber is change. */
+.side-ours {
+  background: var(--fc-ink-95);
+}
+.side-theirs {
+  background: var(--fc-river-95);
+}
+
+.preview summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0.25rem 0;
+}
+
+.result,
+.manual {
+  font-family: Consolas, Menlo, Monaco, monospace;
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+}
+
+.result {
+  max-height: 24rem;
+  overflow: auto;
+  white-space: pre;
+  background: var(--fc-ink-97);
+  border: 1px solid var(--fc-ink-90);
+  padding: 0.5rem;
+}
+
+/* A set height, so the gutter's numbers for every line can't stretch the
+   editor to the length of the flow: the textarea scrolls inside it, and
+   the gutter follows. Dragging the corner makes it taller or shorter. */
+.editor {
+  display: flex;
+  height: 70vh;
+  min-height: 16rem;
+  border: 1px solid var(--fc-ink-80);
+  border-radius: 0.25rem;
+  overflow: hidden;
+  resize: vertical;
+}
+
+.editor:focus-within {
+  border-color: var(--fc-select);
+  box-shadow: 0 0 0 1px var(--fc-select);
+}
+
+.gutter {
+  margin: 0;
+  /* Room for the editor's scrollbar, so the last numbers still line up. */
+  padding: 0.5rem 0.5rem 1.5rem 0.75rem;
+  min-width: 3rem;
+  overflow: hidden;
+  text-align: right;
+  color: var(--fc-ink-50);
+  background: var(--fc-ink-97);
+  border-right: 1px solid var(--fc-ink-90);
+  user-select: none;
+  font-family: Consolas, Menlo, Monaco, monospace;
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+}
+
+.manual {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem;
+  border: none;
+  outline: none;
+  resize: none;
+  overflow: auto;
+  white-space: pre;
+}
+
+.jump {
+  display: block;
+  margin: -0.25rem 0 0.5rem;
+}
+
+.restored {
+  color: var(--fc-ink-40);
+  margin-bottom: 0.5rem;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .change {
+    animation: none;
+  }
+  .status,
+  .change {
+    transition: none;
+  }
+}
+
+.aside {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--fc-sun);
+  background: var(--fc-gold-95);
+}
+
+.aside-text summary {
+  cursor: pointer;
+  padding: 0.25rem 0;
+}

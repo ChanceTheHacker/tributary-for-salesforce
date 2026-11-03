@@ -1,0 +1,1052 @@
+{
+  "FullName": "UAT_Discounts_A",
+  "Metadata": {
+    "apiVersion": 62,
+    "status": "Draft",
+    "processMetadataValues": [
+      {
+        "name": "CanvasMode",
+        "value": {
+          "stringValue": "FREE_FORM_CANVAS"
+        }
+      },
+      {
+        "name": "BuilderType",
+        "value": {
+          "stringValue": "LightningFlowBuilder"
+        }
+      }
+    ],
+    "label": "UAT Discounts A",
+    "description": "Order pricing: region rates, tier bonuses, volume discounts, promo line items and approval. Holds risky orders for review.",
+    "processType": "AutoLaunchedFlow",
+    "interviewLabel": "UAT Discounts A {!$Flow.CurrentDateTime}",
+    "start": {
+      "locationX": 600,
+      "locationY": 0,
+      "connector": {
+        "targetReference": "Validate_Input"
+      }
+    },
+    "decisions": [
+      {
+        "label": "Validate Input",
+        "name": "Validate_Input",
+        "rules": [
+          {
+            "name": "Missing_Amount",
+            "label": "Missing Amount",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "amount",
+                "operator": "IsNull",
+                "rightValue": {
+                  "booleanValue": true
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Set_Error"
+            }
+          }
+        ],
+        "defaultConnectorLabel": "Valid",
+        "defaultConnector": {
+          "targetReference": "Score_Risk"
+        },
+        "locationX": 600,
+        "locationY": 160
+      },
+      {
+        "label": "Check Region",
+        "name": "Check_Region",
+        "rules": [
+          {
+            "name": "North_America",
+            "label": "North America",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "region",
+                "operator": "EqualTo",
+                "rightValue": {
+                  "stringValue": "NA"
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Set_NA_Rate"
+            }
+          },
+          {
+            "name": "EMEA",
+            "label": "EMEA",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "region",
+                "operator": "EqualTo",
+                "rightValue": {
+                  "stringValue": "EMEA"
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Set_EMEA_Rate"
+            }
+          },
+          {
+            "name": "APAC",
+            "label": "APAC",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "region",
+                "operator": "EqualTo",
+                "rightValue": {
+                  "stringValue": "APAC"
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Set_APAC_Rate"
+            }
+          }
+        ],
+        "defaultConnectorLabel": "Otherwise",
+        "defaultConnector": {
+          "targetReference": "Set_Default_Rate"
+        },
+        "locationX": 470,
+        "locationY": 800
+      },
+      {
+        "label": "Check Tier",
+        "name": "Check_Tier",
+        "rules": [
+          {
+            "name": "Gold",
+            "label": "Gold",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "tier",
+                "operator": "EqualTo",
+                "rightValue": {
+                  "stringValue": "Gold"
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Gold_Bonus"
+            }
+          },
+          {
+            "name": "Silver",
+            "label": "Silver",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "tier",
+                "operator": "EqualTo",
+                "rightValue": {
+                  "stringValue": "Silver"
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Silver_Bonus"
+            }
+          },
+          {
+            "name": "Platinum",
+            "label": "Platinum",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "tier",
+                "operator": "EqualTo",
+                "rightValue": {
+                  "stringValue": "Platinum"
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Platinum_Bonus"
+            }
+          }
+        ],
+        "defaultConnectorLabel": "Otherwise",
+        "defaultConnector": {
+          "targetReference": "Check_Amount"
+        },
+        "locationX": 600,
+        "locationY": 1120
+      },
+      {
+        "label": "Check Amount",
+        "name": "Check_Amount",
+        "rules": [
+          {
+            "name": "Large",
+            "label": "Large",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "amount",
+                "operator": "GreaterThanOrEqualTo",
+                "rightValue": {
+                  "numberValue": 10000
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Set_Large_Discount"
+            }
+          },
+          {
+            "name": "Medium",
+            "label": "Medium",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "amount",
+                "operator": "GreaterThanOrEqualTo",
+                "rightValue": {
+                  "numberValue": 1000
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Set_Medium_Discount"
+            }
+          }
+        ],
+        "defaultConnectorLabel": "Otherwise",
+        "defaultConnector": {
+          "targetReference": "Set_Standard_Discount"
+        },
+        "locationX": 600,
+        "locationY": 1440
+      },
+      {
+        "label": "Apply Cap",
+        "name": "Apply_Cap",
+        "rules": [
+          {
+            "name": "Over_Cap",
+            "label": "Over Cap",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "discount",
+                "operator": "GreaterThan",
+                "rightValue": {
+                  "elementReference": "MAX_DISCOUNT"
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Cap_Discount"
+            }
+          }
+        ],
+        "defaultConnectorLabel": "Otherwise",
+        "defaultConnector": {
+          "targetReference": "Loop_Items"
+        },
+        "locationX": 600,
+        "locationY": 1760
+      },
+      {
+        "label": "Check Item",
+        "name": "Check_Item",
+        "rules": [
+          {
+            "name": "Promo",
+            "label": "Promo",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "currentItem",
+                "operator": "StartsWith",
+                "rightValue": {
+                  "stringValue": "PROMO"
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Add_Promo"
+            }
+          }
+        ],
+        "defaultConnectorLabel": "Otherwise",
+        "defaultConnector": {
+          "targetReference": "Loop_Items"
+        },
+        "locationX": 470,
+        "locationY": 2400
+      },
+      {
+        "label": "Check Approval",
+        "name": "Check_Approval",
+        "rules": [
+          {
+            "name": "Needs_Approval",
+            "label": "Needs Approval",
+            "conditionLogic": "or",
+            "conditions": [
+              {
+                "leftValueReference": "discount",
+                "operator": "GreaterThan",
+                "rightValue": {
+                  "numberValue": 20
+                }
+              },
+              {
+                "leftValueReference": "amount",
+                "operator": "GreaterThan",
+                "rightValue": {
+                  "numberValue": 50000
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Set_Needs_Approval"
+            }
+          }
+        ],
+        "defaultConnectorLabel": "Otherwise",
+        "defaultConnector": {
+          "targetReference": "Build_Summary"
+        },
+        "locationX": 730,
+        "locationY": 2240
+      },
+      {
+        "label": "Check Risk",
+        "name": "Check_Risk",
+        "rules": [
+          {
+            "name": "High_Risk",
+            "label": "High Risk",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "riskScore",
+                "operator": "GreaterThan",
+                "rightValue": {
+                  "numberValue": 50
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Hold_Order"
+            }
+          }
+        ],
+        "defaultConnectorLabel": "Otherwise",
+        "defaultConnector": {
+          "targetReference": "Get_Pricebook"
+        },
+        "locationX": 600,
+        "locationY": 480
+      }
+    ],
+    "assignments": [
+      {
+        "label": "Set Error",
+        "name": "Set_Error",
+        "assignmentItems": [
+          {
+            "assignToReference": "errorMessage",
+            "operator": "Assign",
+            "value": {
+              "stringValue": "An amount is required."
+            }
+          }
+        ],
+        "locationX": 730,
+        "locationY": 320
+      },
+      {
+        "label": "Log Error",
+        "name": "Log_Error",
+        "assignmentItems": [
+          {
+            "assignToReference": "errorMessage",
+            "operator": "Assign",
+            "value": {
+              "elementReference": "$Flow.FaultMessage"
+            }
+          }
+        ],
+        "locationX": 730,
+        "locationY": 2720
+      },
+      {
+        "label": "Set NA Rate",
+        "name": "Set_NA_Rate",
+        "assignmentItems": [
+          {
+            "assignToReference": "rate",
+            "operator": "Assign",
+            "value": {
+              "numberValue": 5
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Check_Tier"
+        },
+        "locationX": 470,
+        "locationY": 960
+      },
+      {
+        "label": "Set EMEA Rate",
+        "name": "Set_EMEA_Rate",
+        "assignmentItems": [
+          {
+            "assignToReference": "rate",
+            "operator": "Assign",
+            "value": {
+              "numberValue": 4
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Check_Tier"
+        },
+        "locationX": 730,
+        "locationY": 960
+      },
+      {
+        "label": "Set APAC Rate",
+        "name": "Set_APAC_Rate",
+        "assignmentItems": [
+          {
+            "assignToReference": "rate",
+            "operator": "Assign",
+            "value": {
+              "numberValue": 6
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Check_Tier"
+        },
+        "locationX": 990,
+        "locationY": 960
+      },
+      {
+        "label": "Set Default Rate",
+        "name": "Set_Default_Rate",
+        "assignmentItems": [
+          {
+            "assignToReference": "rate",
+            "operator": "Assign",
+            "value": {
+              "numberValue": 2
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Check_Tier"
+        },
+        "locationX": 210,
+        "locationY": 960
+      },
+      {
+        "label": "Gold Bonus",
+        "name": "Gold_Bonus",
+        "assignmentItems": [
+          {
+            "assignToReference": "bonus",
+            "operator": "Assign",
+            "value": {
+              "numberValue": 5
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Check_Amount"
+        },
+        "locationX": 340,
+        "locationY": 1280
+      },
+      {
+        "label": "Silver Bonus",
+        "name": "Silver_Bonus",
+        "assignmentItems": [
+          {
+            "assignToReference": "bonus",
+            "operator": "Assign",
+            "value": {
+              "numberValue": 3
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Check_Amount"
+        },
+        "locationX": 600,
+        "locationY": 1280
+      },
+      {
+        "label": "Platinum Bonus",
+        "name": "Platinum_Bonus",
+        "assignmentItems": [
+          {
+            "assignToReference": "bonus",
+            "operator": "Assign",
+            "value": {
+              "numberValue": 8
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Check_Amount"
+        },
+        "locationX": 860,
+        "locationY": 1280
+      },
+      {
+        "label": "Set Large Discount",
+        "name": "Set_Large_Discount",
+        "assignmentItems": [
+          {
+            "assignToReference": "discount",
+            "operator": "Assign",
+            "value": {
+              "elementReference": "rate"
+            }
+          },
+          {
+            "assignToReference": "discount",
+            "operator": "Add",
+            "value": {
+              "elementReference": "bonus"
+            }
+          },
+          {
+            "assignToReference": "discount",
+            "operator": "Add",
+            "value": {
+              "numberValue": 15
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Apply_Cap"
+        },
+        "locationX": 600,
+        "locationY": 1600
+      },
+      {
+        "label": "Set Medium Discount",
+        "name": "Set_Medium_Discount",
+        "assignmentItems": [
+          {
+            "assignToReference": "discount",
+            "operator": "Assign",
+            "value": {
+              "elementReference": "rate"
+            }
+          },
+          {
+            "assignToReference": "discount",
+            "operator": "Add",
+            "value": {
+              "elementReference": "bonus"
+            }
+          },
+          {
+            "assignToReference": "discount",
+            "operator": "Add",
+            "value": {
+              "numberValue": 5
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Apply_Cap"
+        },
+        "locationX": 860,
+        "locationY": 1600
+      },
+      {
+        "label": "Set Standard Discount",
+        "name": "Set_Standard_Discount",
+        "assignmentItems": [
+          {
+            "assignToReference": "discount",
+            "operator": "Assign",
+            "value": {
+              "elementReference": "rate"
+            }
+          },
+          {
+            "assignToReference": "discount",
+            "operator": "Add",
+            "value": {
+              "elementReference": "bonus"
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Apply_Cap"
+        },
+        "locationX": 340,
+        "locationY": 1600
+      },
+      {
+        "label": "Cap Discount",
+        "name": "Cap_Discount",
+        "assignmentItems": [
+          {
+            "assignToReference": "discount",
+            "operator": "Assign",
+            "value": {
+              "elementReference": "MAX_DISCOUNT"
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Loop_Items"
+        },
+        "locationX": 600,
+        "locationY": 1920
+      },
+      {
+        "label": "Count Item",
+        "name": "Count_Item",
+        "assignmentItems": [
+          {
+            "assignToReference": "itemCount",
+            "operator": "Add",
+            "value": {
+              "numberValue": 1
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Check_Item"
+        },
+        "locationX": 470,
+        "locationY": 2240
+      },
+      {
+        "label": "Add Promo",
+        "name": "Add_Promo",
+        "assignmentItems": [
+          {
+            "assignToReference": "promoCount",
+            "operator": "Add",
+            "value": {
+              "numberValue": 1
+            }
+          },
+          {
+            "assignToReference": "discount",
+            "operator": "Add",
+            "value": {
+              "numberValue": 2
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Loop_Items"
+        },
+        "locationX": 470,
+        "locationY": 2560
+      },
+      {
+        "label": "Set Needs Approval",
+        "name": "Set_Needs_Approval",
+        "assignmentItems": [
+          {
+            "assignToReference": "needsApproval",
+            "operator": "Assign",
+            "value": {
+              "booleanValue": true
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Find_Approver"
+        },
+        "locationX": 730,
+        "locationY": 2400
+      },
+      {
+        "label": "Set Approver",
+        "name": "Set_Approver",
+        "assignmentItems": [
+          {
+            "assignToReference": "approverId",
+            "operator": "Assign",
+            "value": {
+              "elementReference": "Find_Approver.Id"
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Build_Summary"
+        },
+        "locationX": 470,
+        "locationY": 2720
+      },
+      {
+        "label": "Build Summary",
+        "name": "Build_Summary",
+        "assignmentItems": [
+          {
+            "assignToReference": "summary",
+            "operator": "Assign",
+            "value": {
+              "elementReference": "summaryText"
+            }
+          },
+          {
+            "assignToReference": "summary",
+            "operator": "Add",
+            "value": {
+              "stringValue": " Risk checked."
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Round_Discount"
+        },
+        "locationX": 600,
+        "locationY": 2880
+      },
+      {
+        "label": "Round Discount",
+        "name": "Round_Discount",
+        "assignmentItems": [
+          {
+            "assignToReference": "discount",
+            "operator": "Assign",
+            "value": {
+              "elementReference": "roundedDiscount"
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Set_Net"
+        },
+        "locationX": 600,
+        "locationY": 3040
+      },
+      {
+        "label": "Set Net",
+        "name": "Set_Net",
+        "assignmentItems": [
+          {
+            "assignToReference": "netTotal",
+            "operator": "Assign",
+            "value": {
+              "elementReference": "netAmount"
+            }
+          }
+        ],
+        "locationX": 600,
+        "locationY": 3200
+      },
+      {
+        "label": "Score Risk",
+        "name": "Score_Risk",
+        "assignmentItems": [
+          {
+            "assignToReference": "riskScore",
+            "operator": "Assign",
+            "value": {
+              "elementReference": "riskEstimate"
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Check_Risk"
+        },
+        "locationX": 470,
+        "locationY": 320
+      },
+      {
+        "label": "Hold Order",
+        "name": "Hold_Order",
+        "assignmentItems": [
+          {
+            "assignToReference": "holdReason",
+            "operator": "Assign",
+            "value": {
+              "stringValue": "Risk score is over 50"
+            }
+          },
+          {
+            "assignToReference": "needsApproval",
+            "operator": "Assign",
+            "value": {
+              "booleanValue": true
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Notify_Risk_Team"
+        },
+        "locationX": 730,
+        "locationY": 640
+      },
+      {
+        "label": "Notify Risk Team",
+        "name": "Notify_Risk_Team",
+        "assignmentItems": [
+          {
+            "assignToReference": "summary",
+            "operator": "Assign",
+            "value": {
+              "stringValue": "Held for review: {!holdReason}"
+            }
+          }
+        ],
+        "locationX": 730,
+        "locationY": 800
+      }
+    ],
+    "recordLookups": [
+      {
+        "label": "Get Pricebook",
+        "name": "Get_Pricebook",
+        "object": "Pricebook2",
+        "filterLogic": "and",
+        "filters": [
+          {
+            "field": "IsStandard",
+            "operator": "EqualTo",
+            "value": {
+              "booleanValue": true
+            }
+          }
+        ],
+        "getFirstRecordOnly": true,
+        "storeOutputAutomatically": true,
+        "connector": {
+          "targetReference": "Check_Region"
+        },
+        "faultConnector": {
+          "targetReference": "Log_Error"
+        },
+        "locationX": 470,
+        "locationY": 640
+      },
+      {
+        "label": "Find Approver",
+        "name": "Find_Approver",
+        "object": "User",
+        "filterLogic": "and",
+        "filters": [
+          {
+            "field": "IsActive",
+            "operator": "EqualTo",
+            "value": {
+              "booleanValue": true
+            }
+          }
+        ],
+        "getFirstRecordOnly": true,
+        "storeOutputAutomatically": true,
+        "connector": {
+          "targetReference": "Set_Approver"
+        },
+        "faultConnector": {
+          "targetReference": "Log_Error"
+        },
+        "locationX": 730,
+        "locationY": 2560
+      }
+    ],
+    "loops": [
+      {
+        "label": "Loop Items",
+        "name": "Loop_Items",
+        "collectionReference": "lineItems",
+        "assignNextValueToReference": "currentItem",
+        "iterationOrder": "Asc",
+        "nextValueConnector": {
+          "targetReference": "Count_Item"
+        },
+        "noMoreValuesConnector": {
+          "targetReference": "Check_Approval"
+        },
+        "locationX": 600,
+        "locationY": 2080
+      }
+    ],
+    "variables": [
+      {
+        "name": "amount",
+        "dataType": "Currency",
+        "isCollection": false,
+        "isInput": true,
+        "isOutput": false,
+        "scale": 2
+      },
+      {
+        "name": "region",
+        "dataType": "String",
+        "isCollection": false,
+        "isInput": true,
+        "isOutput": false
+      },
+      {
+        "name": "tier",
+        "dataType": "String",
+        "isCollection": false,
+        "isInput": true,
+        "isOutput": false
+      },
+      {
+        "name": "lineItems",
+        "dataType": "String",
+        "isCollection": true,
+        "isInput": true,
+        "isOutput": false
+      },
+      {
+        "name": "rate",
+        "dataType": "Number",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": false,
+        "scale": 2
+      },
+      {
+        "name": "bonus",
+        "dataType": "Number",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": false,
+        "scale": 2
+      },
+      {
+        "name": "discount",
+        "dataType": "Number",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": true,
+        "scale": 2
+      },
+      {
+        "name": "needsApproval",
+        "dataType": "Boolean",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": true
+      },
+      {
+        "name": "approverId",
+        "dataType": "String",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": true
+      },
+      {
+        "name": "summary",
+        "dataType": "String",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": true
+      },
+      {
+        "name": "errorMessage",
+        "dataType": "String",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": true
+      },
+      {
+        "name": "netTotal",
+        "dataType": "Currency",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": true,
+        "scale": 2
+      },
+      {
+        "name": "itemCount",
+        "dataType": "Number",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": false,
+        "scale": 2
+      },
+      {
+        "name": "promoCount",
+        "dataType": "Number",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": false,
+        "scale": 2
+      },
+      {
+        "name": "currentItem",
+        "dataType": "String",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": false
+      },
+      {
+        "name": "riskScore",
+        "dataType": "Number",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": false,
+        "scale": 2
+      },
+      {
+        "name": "holdReason",
+        "dataType": "String",
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": true
+      }
+    ],
+    "constants": [
+      {
+        "name": "MAX_DISCOUNT",
+        "dataType": "Number",
+        "value": {
+          "numberValue": 35
+        }
+      }
+    ],
+    "formulas": [
+      {
+        "name": "netAmount",
+        "dataType": "Currency",
+        "scale": 2,
+        "expression": "{!amount} * (1 - {!discount} / 100)"
+      },
+      {
+        "name": "roundedDiscount",
+        "dataType": "Number",
+        "scale": 0,
+        "expression": "ROUND({!discount}, 0)"
+      },
+      {
+        "name": "riskEstimate",
+        "dataType": "Number",
+        "scale": 0,
+        "expression": "{!amount} / 1000 + IF({!region} = 'APAC', 10, 0)"
+      }
+    ],
+    "textTemplates": [
+      {
+        "name": "summaryText",
+        "isViewedAsPlainText": true,
+        "text": "Region {!region}, tier {!tier}: {!discount}% off {!itemCount} items ({!promoCount} promo)."
+      }
+    ]
+  }
+}

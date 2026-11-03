@@ -1,0 +1,214 @@
+<template>
+  <template lwc:if={open}>
+    <span class="focus-guard" tabindex="0" onfocus={handleFocusLast}></span>
+    <section
+      role="dialog"
+      tabindex="-1"
+      aria-modal="true"
+      aria-labelledby="save-heading"
+      class="slds-modal slds-fade-in-open"
+      onkeydown={handleKeyDown}
+    >
+      <div class="slds-modal__container">
+        <div class="slds-modal__header header">
+          <h1 id="save-heading" class="slds-modal__title slds-hyphenate">
+            {heading}
+          </h1>
+          <lightning-button-icon
+            class="close"
+            icon-name="utility:close"
+            variant="bare"
+            size="large"
+            alternative-text="Close"
+            title="Close"
+            onclick={handleClose}
+          ></lightning-button-icon>
+        </div>
+        <div class="slds-modal__content slds-p-around_medium">
+          <template lwc:if={error}>
+            <div class="error" role="alert">{error}</div>
+          </template>
+          <template lwc:if={stale}>
+            <div class="error stale" role="alert">
+              <p>
+                Nothing was saved. What this merge was made from has changed
+                since it was compared:
+              </p>
+              <ul>
+                <template for:each={staleList} for:item="reason">
+                  <li key={reason.key}>{reason.text}</li>
+                </template>
+              </ul>
+              <lightning-button
+                class="recompare"
+                label="Compare again"
+                onclick={handleRecompare}
+              ></lightning-button>
+            </div>
+          </template>
+          <template lwc:if={notSaved}>
+            <lightning-radio-group
+              class="first"
+              name="kind"
+              label="Save as"
+              options={kindOptions}
+              value={target}
+              disabled={busy}
+              onchange={handleKind}
+            ></lightning-radio-group>
+            <template lwc:if={isNewVersion}>
+              <lightning-combobox
+                class="field"
+                label="Flow"
+                options={targetOptions}
+                value={targetIndex}
+                disabled={busy}
+                onchange={handleTarget}
+              ></lightning-combobox>
+            </template>
+            <template lwc:if={isNewFlow}>
+              <lightning-combobox
+                class="field"
+                label="Org"
+                options={connectionOptions}
+                value={connection}
+                disabled={busy}
+                onchange={handleConnection}
+              ></lightning-combobox>
+              <lightning-input
+                class="field flow-label"
+                label="Flow label"
+                value={newLabel}
+                max-length="255"
+                disabled={busy}
+                onchange={handleLabel}
+              ></lightning-input>
+              <lightning-input
+                class="field api-name"
+                label="Flow API name"
+                value={newApiName}
+                max-length="80"
+                required
+                disabled={busy}
+                onchange={handleApiName}
+              ></lightning-input>
+              <template lwc:if={apiNameError}>
+                <p class="warning">{apiNameError}</p>
+              </template>
+            </template>
+            <template lwc:if={targetWarning}>
+              <p class="warning target-warning">{targetWarning}</p>
+            </template>
+            <lightning-textarea
+              class="field description"
+              label="Version description"
+              field-level-help="Starts as the merged flow's description. Shown with this version in Setup and in Flow Builder. Say what changed and why."
+              placeholder="What this version changes"
+              value={description}
+              disabled={busy}
+              onchange={handleDescription}
+            ></lightning-textarea>
+            <template lwc:if={receipt}>
+              <h2 class="slds-text-heading_small section">
+                What's being saved
+              </h2>
+              <c-flow-receipt-card receipt={receipt}></c-flow-receipt-card>
+            </template>
+            <template lwc:else>
+              <p class="note">
+                The flow is saved as an inactive version. Nothing changes for
+                users until a version is activated.
+              </p>
+            </template>
+            <template lwc:if={busy}>
+              <p class="saving" role="status">
+                <span class="saving-dot" aria-hidden="true"></span>
+                Saving continues if you close this dialog.
+              </p>
+            </template>
+          </template>
+          <template lwc:else>
+            <p class="saved" role="status">
+              <lightning-icon
+                icon-name="utility:success"
+                size="x-small"
+                variant="success"
+                alternative-text="Saved"
+              ></lightning-icon>
+              {resultText}
+            </p>
+            <div class="links">
+              <template lwc:if={compareWith}>
+                <button
+                  class="slds-button compare"
+                  type="button"
+                  onclick={handleCompare}
+                >
+                  {compareLabel}
+                </button>
+              </template>
+              <template lwc:if={builderUrl}>
+                <a
+                  class="builder"
+                  href={builderUrl}
+                  target="_blank"
+                  rel="noopener"
+                  >Open in Flow Builder</a
+                >
+              </template>
+            </div>
+            <template lwc:if={remoteNote}>
+              <p class="note">{remoteNote}</p>
+            </template>
+            <details class="saved-receipt">
+              <summary>Receipt</summary>
+              <c-flow-receipt-card
+                receipt={receipt}
+                saved
+              ></c-flow-receipt-card>
+            </details>
+            <h2 class="slds-text-heading_small section">Activation</h2>
+            <c-flow-activation
+              connection={savedConnection}
+              api-name={savedApiName}
+              label={savedLabel}
+              version-number={result.versionNumber}
+              version-id={result.versionId}
+              active-version={savedActiveVersion}
+              org-label={savedOrgLabel}
+              change-summary={activationSummary}
+              review-checks={receipt.checks}
+              reviewed-at={result.lastModifiedDate}
+              onactivated={handleActivated}
+            ></c-flow-activation>
+          </template>
+        </div>
+        <div class="slds-modal__footer">
+          <template lwc:if={notSaved}>
+            <lightning-button
+              class="cancel"
+              label={cancelLabel}
+              onclick={handleClose}
+            ></lightning-button>
+            <lightning-button
+              class="save"
+              variant="brand"
+              label={saveLabel}
+              disabled={saveDisabled}
+              onclick={handleSave}
+            ></lightning-button>
+          </template>
+          <template lwc:else>
+            <lightning-button
+              variant="brand"
+              label="Done"
+              onclick={handleClose}
+            ></lightning-button>
+          </template>
+        </div>
+      </div>
+    </section>
+    <span class="focus-guard" tabindex="0" onfocus={handleFocusFirst}></span>
+    <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+  </template>
+</template>

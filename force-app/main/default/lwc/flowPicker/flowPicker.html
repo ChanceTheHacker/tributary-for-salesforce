@@ -1,0 +1,110 @@
+<template>
+  <div class="slds-form-element">
+    <label class="slds-form-element__label" for="input">
+      <template lwc:if={isRequired}>
+        <abbr class="slds-required" title="required">*</abbr>
+      </template>
+      {label}
+    </label>
+    <div class="slds-form-element__control">
+      <div class="slds-combobox_container">
+        <div class={comboboxClass}>
+          <div
+            class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right"
+            role="none"
+          >
+            <input
+              id="input"
+              class="slds-input slds-combobox__input"
+              type="text"
+              role="combobox"
+              autocomplete="off"
+              aria-autocomplete="list"
+              aria-controls="listbox"
+              aria-expanded={expanded}
+              aria-activedescendant={activeId}
+              aria-required={isRequired}
+              placeholder={placeholder}
+              value={inputValue}
+              disabled={disabled}
+              onclick={handleClick}
+              oninput={handleInput}
+              onkeydown={handleKeyDown}
+              onblur={handleBlur}
+            />
+            <lightning-icon
+              class="slds-input__icon slds-input__icon_right search-icon"
+              icon-name="utility:search"
+              size="x-small"
+              alternative-text=""
+            ></lightning-icon>
+          </div>
+          <template lwc:if={open}>
+            <div
+              id="listbox"
+              class="menu"
+              role="listbox"
+              aria-label={label}
+              style={menuStyle}
+              onmousedown={handleMenuDown}
+              onscroll={handleMenuScroll}
+            >
+              <template lwc:if={hasItems}>
+                <ul role="presentation">
+                  <template lwc:if={earlierText}>
+                    <li
+                      class="more earlier"
+                      role="presentation"
+                      aria-hidden="true"
+                      onclick={handleEarlier}
+                    >
+                      {earlierText}
+                    </li>
+                  </template>
+                  <template for:each={items} for:item="item">
+                    <li
+                      key={item.key}
+                      id={item.id}
+                      class={item.className}
+                      role="option"
+                      aria-selected={item.ariaSelected}
+                      aria-setsize={matchCount}
+                      aria-posinset={item.position}
+                      data-index={item.index}
+                      onclick={handleOption}
+                      onmousemove={handleHover}
+                    >
+                      <span class="option-label">{item.label}</span>
+                      <template lwc:if={item.chosen}>
+                        <lightning-icon
+                          class="option-check"
+                          icon-name="utility:check"
+                          size="xx-small"
+                          alternative-text="Current"
+                        ></lightning-icon>
+                      </template>
+                    </li>
+                  </template>
+                  <template lwc:if={moreText}>
+                    <li
+                      class="more"
+                      role="presentation"
+                      aria-hidden="true"
+                      onclick={handleMore}
+                    >
+                      {moreText}
+                    </li>
+                  </template>
+                </ul>
+              </template>
+              <template lwc:else>
+                <p class="empty">{emptyText}</p>
+              </template>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+    <span class="slds-assistive-text" aria-live="polite">{statusText}</span>
+  </div>
+</template>

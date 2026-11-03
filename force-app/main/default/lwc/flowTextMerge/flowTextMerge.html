@@ -1,0 +1,142 @@
+<template>
+  <template lwc:if={ready}>
+    <div class="text-merge">
+      <div class="bar">
+        <span class="count">{countText}</span>
+        <template lwc:if={notEditing}>
+          <template for:each={presets} for:item="preset">
+            <lightning-button
+              key={preset.key}
+              label={preset.label}
+              data-side={preset.key}
+              onclick={handlePreset}
+            ></lightning-button>
+          </template>
+        </template>
+        <lightning-button
+          class="edit"
+          variant="base"
+          icon-name={editIcon}
+          label={editLabel}
+          onclick={toggleEdit}
+        ></lightning-button>
+      </div>
+      <p class={status.className} role="status">{status.text}</p>
+      <template lwc:if={jump}>
+        <lightning-button
+          class="jump"
+          variant="base"
+          icon-name="utility:level_down"
+          label={jump.label}
+          onclick={handleJump}
+        ></lightning-button>
+      </template>
+      <template lwc:if={restored}>
+        <p class="restored">{restoredText}</p>
+      </template>
+      <template lwc:if={hasAside}>
+        <div class="aside" role="status">
+          <p>{asideText}</p>
+          <template lwc:if={asideEdited}>
+            <details class="aside-text">
+              <summary>Show the earlier hand-edited XML</summary>
+              <pre class="result">{asideEdited}</pre>
+            </details>
+          </template>
+          <lightning-button
+            class="discard-aside"
+            variant="base"
+            label="Discard them"
+            onclick={handleDiscardAside}
+          ></lightning-button>
+        </div>
+      </template>
+
+      <template lwc:if={notEditing}>
+        <template lwc:if={autoSummary}>
+          <p class="auto">{autoSummary}</p>
+        </template>
+        <template lwc:if={hasChanges}>
+          <template for:each={changes} for:item="change">
+            <section key={change.key} class={change.className}>
+              <header class="change-head">
+                <strong>{change.title}</strong>
+                <template lwc:if={change.element}>
+                  <span class="element">{change.element}</span>
+                </template>
+                <lightning-radio-group
+                  class="pick"
+                  name={change.key}
+                  label="Use"
+                  variant="label-hidden"
+                  type="button"
+                  options={change.options}
+                  value={change.value}
+                  data-index={change.index}
+                  onchange={handlePick}
+                ></lightning-radio-group>
+              </header>
+              <template lwc:if={change.hint}>
+                <p class="hint">{change.hint}</p>
+              </template>
+              <template lwc:if={change.foldable}>
+                <button
+                  class="slds-button fold"
+                  aria-expanded={change.expandedText}
+                  data-key={change.key}
+                  onclick={handleFold}
+                >
+                  {change.foldLabel}
+                </button>
+              </template>
+              <template lwc:if={change.open}>
+                <div class="columns">
+                  <template for:each={change.columns} for:item="column">
+                    <div key={column.key} class="column">
+                      <div class="column-head">{column.label}</div>
+                      <template for:each={column.lines} for:item="line">
+                        <div key={line.key} class={line.className}>
+                          <span class="no">{line.no}</span>
+                          <span class="text">{line.text}</span>
+                        </div>
+                      </template>
+                    </div>
+                  </template>
+                </div>
+              </template>
+            </section>
+          </template>
+          <template lwc:if={moreChangesText}>
+            <lightning-button
+              class="more-changes"
+              label={moreChangesText}
+              onclick={handleMoreChanges}
+            ></lightning-button>
+          </template>
+        </template>
+        <template lwc:else>
+          <p class="auto">{noChangesText}</p>
+        </template>
+        <details class="preview">
+          <summary>Merged XML</summary>
+          <pre class="result">{resultText}</pre>
+        </details>
+      </template>
+      <template lwc:else>
+        <label class="slds-form-element__label" for="manual">Merged XML</label>
+        <div class="editor">
+          <pre class="gutter" aria-hidden="true">{gutterText}</pre>
+          <textarea
+            id="manual"
+            class="manual"
+            spellcheck="false"
+            wrap="off"
+            oninput={handleEdit}
+            onscroll={handleScroll}
+          >
+{resultText}</textarea>
+        </div>
+      </template>
+    </div>
+  </template>
+</template>

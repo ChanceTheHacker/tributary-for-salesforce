@@ -1,0 +1,23 @@
+<template>
+  <template lwc:if={visible}>
+    <template lwc:if={isLink}>
+      <lightning-button
+        class="help-link"
+        variant="base"
+        icon-name="utility:video"
+        label={linkLabel}
+        onclick={handleOpen}
+      ></lightning-button>
+    </template>
+    <template lwc:else>
+      <lightning-button-icon
+        class="help"
+        icon-name="utility:video"
+        variant="bare"
+        alternative-text={altText}
+        tooltip="Click to watch how to use this"
+        onclick={handleOpen}
+      ></lightning-button-icon>
+    </template>
+  </template>
+</template>

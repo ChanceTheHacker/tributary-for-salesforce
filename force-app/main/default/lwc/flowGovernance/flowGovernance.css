@@ -1,0 +1,476 @@
+@import "c/flowTokens";
+@import "c/flowBand";
+
+:host {
+  display: block;
+}
+
+.page {
+  background: #fff;
+  border-radius: 0.25rem;
+  padding: 1rem;
+  min-height: calc(100vh - 7rem);
+  display: grid;
+  /* One column no wider than the card, however wide its content. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  align-content: start;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.subtitle,
+.meta {
+  color: var(--fc-ink-40);
+}
+
+.count {
+  margin-left: 0.25rem;
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search {
+  min-width: 16rem;
+}
+
+.error {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--fc-macaw-30);
+  background: var(--fc-macaw-95);
+  border-radius: 0.25rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.checking {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-left: 1.5rem;
+}
+
+.check-results,
+.history-panel {
+  border: 1px solid var(--fc-ink-90);
+  border-radius: 0.25rem;
+  padding: 0.75rem 1rem;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.history-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.check {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.check-error .check-text,
+.last-check.check-error {
+  color: var(--fc-macaw-30);
+}
+
+.check-warning .check-text,
+.last-check.check-warning {
+  color: var(--fc-gold-40);
+}
+
+.loading {
+  position: relative;
+  height: 3rem;
+}
+
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: 2.5rem 1rem;
+  color: var(--fc-ink-40);
+}
+
+/*
+ * Cells wrap so the table fits its card: a scrolling box around it would clip
+ * the row menus. At phone widths the rows stack instead.
+ */
+.governed tbody th,
+.governed tbody td {
+  white-space: normal;
+}
+
+.flow-name {
+  font-weight: 600;
+}
+
+.api-name {
+  font-size: 0.75rem;
+  /* Long API names break anywhere, so they don't set the column's width. */
+  overflow-wrap: anywhere;
+}
+
+.row-selected > * {
+  background: var(--fc-select-bg);
+}
+
+.drift {
+  margin-left: 0.25rem;
+}
+
+.governed tbody .row-actions {
+  white-space: nowrap;
+  text-align: right;
+  /* Stacked cells hide their overflow, which would clip the menu. */
+  overflow: visible;
+}
+
+.governed tbody .row-actions > * + * {
+  margin-left: 0.75rem;
+}
+
+/* On small laptops the row's actions stack, so the table fits its card. */
+@media (min-width: 56.3125em) and (max-width: 64em) {
+  .governed tbody .row-actions > * {
+    display: block;
+    width: max-content;
+    margin-left: auto;
+  }
+  .governed tbody .row-actions > * + * {
+    margin-top: 0.25rem;
+  }
+}
+
+/* Keep all fields available without squeezing eight columns onto a tablet. */
+@media (max-width: 56.25em) {
+  .governed thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .governed,
+  .governed tbody,
+  .governed tbody tr {
+    display: block;
+    width: 100%;
+  }
+  .governed tbody tr {
+    border-bottom: 2px solid var(--fc-ink-80);
+    padding: 0.5rem 0;
+  }
+  .governed tbody th,
+  .governed tbody td {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr);
+    gap: 0 0.5rem;
+    text-align: left;
+    border: 0;
+    overflow-wrap: anywhere;
+  }
+  .governed tbody [data-label]::before {
+    content: attr(data-label);
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    font-weight: 600;
+  }
+  .governed tbody [data-label] > * {
+    grid-column: 2;
+    justify-self: start;
+  }
+  .governed tbody .row-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+
+/* Whether scheduled checks enforce the modes in the table. */
+.checks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--fc-ink-90);
+  border-radius: 0.25rem;
+  color: var(--fc-ink-30);
+  animation: fade-in var(--fc-dur) var(--fc-ease-out) backwards;
+}
+
+.checks-off {
+  border-color: var(--fc-sun);
+  background: var(--fc-gold-95);
+  color: var(--fc-gold-30);
+}
+
+.checks-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.checks-link {
+  margin-left: auto;
+}
+
+.history-panel .events,
+.day-head {
+  transition: opacity var(--fc-dur-fast) ease;
+}
+
+.history-panel.busy .events,
+.history-panel.busy .day-head {
+  opacity: 0.5;
+}
+
+.day + .day {
+  margin-top: 1rem;
+}
+
+/* Stays in view while that day's events scroll past. */
+.day-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0 -0.5rem 0.375rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--fc-ink-40);
+  background: #fff;
+  border-bottom: 1px solid var(--fc-ink-90);
+}
+
+.older {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.75rem;
+}
+
+.history-loading {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--fc-ink-40);
+}
+
+.events {
+  display: grid;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.event {
+  animation: fade-in var(--fc-dur) var(--fc-ease-out) backwards;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: start;
+  padding: 0.375rem 0.5rem;
+  border-left: 3px solid var(--fc-ink-80);
+}
+
+.event-success {
+  border-left-color: var(--fc-canopy-50);
+}
+
+.event-warning {
+  border-left-color: var(--fc-gold-60);
+}
+
+.event-error {
+  border-left-color: var(--fc-macaw-40);
+}
+
+.event-info {
+  border-left-color: var(--fc-teal);
+}
+
+.event-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.event-line > *,
+.event-details {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Opens that flow's history. */
+.event-flow {
+  line-height: inherit;
+  color: var(--fc-link);
+  text-align: left;
+  white-space: normal;
+}
+
+.event-flow:hover {
+  text-decoration: underline;
+}
+
+.event-details {
+  color: var(--fc-ink-30);
+}
+
+.detail-block + .detail-block {
+  margin-top: 0.25rem;
+}
+
+.detail-items {
+  margin: 0.125rem 0 0 1.25rem;
+  list-style: disc;
+}
+
+.modal-header {
+  position: relative;
+  padding-right: 3rem;
+  padding-left: 3rem;
+}
+
+.close {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+}
+
+.form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.mode-description {
+  background: var(--fc-ink-95);
+  border-radius: 0.25rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.checks-warning {
+  border: 1px solid var(--fc-sun);
+  background: var(--fc-gold-95);
+  color: var(--fc-gold-30);
+  border-radius: 0.25rem;
+  padding: 0.5rem 0.75rem;
+}
+
+/* Dialogs rise into place over a fading backdrop. */
+.slds-modal__container {
+  animation: dialog-in var(--fc-dur) var(--fc-ease-out) backwards;
+}
+
+/*
+ * Salesforce's header covers the top of the window, so dialogs keep below it
+ * and scroll their body when there isn't room. The header is taller when its
+ * items wrap.
+ */
+.slds-modal__container {
+  padding-top: 9rem;
+  padding-bottom: 1.5rem;
+}
+
+@media (max-width: 56em) {
+  .slds-modal__container {
+    padding-top: 12rem;
+  }
+}
+
+.slds-backdrop {
+  animation: fade-in var(--fc-dur-fast) var(--fc-ease-out) backwards;
+}
+
+.check-results {
+  animation: fade-in var(--fc-dur) var(--fc-ease-out) backwards;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Governance modes: the stricter, the deeper the river. */
+.mode-owner {
+  background: var(--fc-river-90);
+  color: var(--fc-river-30);
+}
+.mode-approval {
+  background: var(--fc-deep);
+  color: var(--fc-cream);
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* At phone widths, times go under what happened. */
+@media (max-width: 30em) {
+  .event {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .event time {
+    grid-column: 2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checks,
+  .event,
+  .check-results,
+  .slds-modal__container,
+  .slds-backdrop {
+    animation: none;
+  }
+  .history-panel .events {
+    transition: none;
+  }
+}

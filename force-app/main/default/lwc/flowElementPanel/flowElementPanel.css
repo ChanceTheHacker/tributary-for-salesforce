@@ -1,0 +1,473 @@
+@import "c/flowTokens";
+
+:host {
+  display: block;
+}
+
+/* The side panel around it already pads; this adds only a little. */
+.panel {
+  padding: 0.25rem 0;
+  font-size: 0.8125rem;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  color: var(--fc-ink-40);
+  font-size: 0.75rem;
+}
+
+.api {
+  font-family: Consolas, Menlo, Monaco, monospace;
+}
+
+.status {
+  flex: none;
+  padding: 0 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.25rem;
+  background: var(--fc-ink-95);
+  color: var(--fc-ink-30);
+}
+.status-added {
+  background: var(--fc-added-bg);
+  color: var(--fc-canopy-30);
+}
+.status-removed {
+  background: var(--fc-removed-bg);
+  color: var(--fc-macaw-30);
+}
+.status-changed {
+  background: var(--fc-changed-bg);
+  color: var(--fc-gold-30);
+}
+.status-excluded {
+  background: var(--fc-ink-90);
+}
+.status-conflict {
+  background: var(--fc-removed);
+  color: #fff;
+}
+.status-resolved {
+  background: var(--fc-added-bg);
+  color: var(--fc-canopy-30);
+}
+
+.summary {
+  margin-top: 0.5rem;
+  color: var(--fc-ink-30);
+}
+
+.section {
+  margin: 1rem 0 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--fc-ink-20);
+}
+
+summary.section {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  cursor: pointer;
+  list-style: none;
+  border-radius: 0.25rem;
+}
+summary.section::-webkit-details-marker {
+  display: none;
+}
+summary.section:focus-visible {
+  outline: 2px solid var(--fc-select);
+  outline-offset: 2px;
+}
+
+.chevron {
+  display: inline-flex;
+  transition: transform var(--fc-dur) var(--fc-ease-out);
+}
+.properties[open] .chevron {
+  transform: rotate(90deg);
+}
+.properties[open] dl {
+  animation: rise-in var(--fc-dur) var(--fc-ease-out) backwards;
+}
+
+/* Each change is a small card: the field, then its old and new value. */
+.changes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.change {
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--fc-ink-90);
+  border-radius: 0.375rem;
+  overflow: hidden;
+  animation: rise-in var(--fc-dur) var(--fc-ease-out) backwards;
+}
+
+.change-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
+}
+
+.path {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.change-status {
+  flex: none;
+  font-size: 0.6875rem;
+  color: var(--fc-ink-40);
+}
+
+.line {
+  display: flex;
+  gap: 0.375rem;
+  padding: 0.3125rem 0.5rem;
+  border-top: 1px solid rgba(15, 42, 29, 0.06);
+}
+.line.before {
+  background: var(--fc-removed-bg);
+}
+.line.after {
+  background: var(--fc-added-bg);
+}
+
+.mark {
+  flex: none;
+  width: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+}
+.before .mark {
+  color: var(--fc-removed-text);
+}
+.after .mark {
+  color: var(--fc-added-text);
+}
+
+.line-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.line-side {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--fc-ink-40);
+}
+
+.line .text {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+/* Values keep their lines and indents; long ones scroll. */
+.multiline {
+  display: block;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 16rem;
+  overflow: auto;
+}
+
+.before .vline-diff {
+  background: rgba(215, 57, 43, 0.12);
+}
+
+.after .vline-diff {
+  background: rgba(47, 132, 66, 0.16);
+}
+
+.connectors {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.connector {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0;
+  border-top: 1px solid var(--fc-ink-95);
+}
+
+.connector-label {
+  font-weight: 600;
+}
+
+.old-target {
+  color: var(--fc-removed-text);
+}
+
+.connector-added .target,
+.connector-retargeted .target {
+  color: var(--fc-added-text);
+  font-weight: 600;
+}
+
+.connector-removed .target {
+  color: var(--fc-removed-text);
+  text-decoration: line-through;
+}
+
+.connector-changed .target {
+  color: var(--fc-gold-40);
+}
+
+.connector-status {
+  margin-left: auto;
+  font-size: 0.6875rem;
+  color: var(--fc-ink-40);
+}
+
+.property {
+  display: grid;
+  grid-template-columns: minmax(6rem, 2fr) 3fr;
+  gap: 0.5rem;
+  padding: 0.3125rem 0;
+  border-top: 1px solid var(--fc-ink-95);
+}
+
+.property dt {
+  color: var(--fc-ink-40);
+  overflow-wrap: anywhere;
+}
+
+.property dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.take-all {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.side-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.side-buttons lightning-button {
+  flex: none;
+  white-space: nowrap;
+}
+
+.take-all-label {
+  font-size: 0.75rem;
+  color: var(--fc-ink-40);
+}
+
+.unit {
+  margin: 0 0 0.625rem;
+  padding: 0.5rem;
+  border: 1px solid var(--fc-ink-90);
+  border-radius: 0.375rem;
+  min-width: 0;
+  transition:
+    border-color var(--fc-dur) ease,
+    box-shadow var(--fc-dur) ease;
+}
+
+.unit-conflict {
+  border-color: var(--fc-removed);
+  box-shadow: inset 3px 0 0 var(--fc-removed);
+}
+
+.unit-label {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0 0.25rem;
+  font-weight: 600;
+}
+
+.unit-name {
+  overflow-wrap: anywhere;
+}
+
+.tag {
+  padding: 0 0.375rem;
+  border-radius: 1rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.125rem;
+  animation: pop-in var(--fc-dur) var(--fc-ease-out) backwards;
+}
+.tag-conflict {
+  background: var(--fc-removed-bg);
+  color: var(--fc-macaw-30);
+}
+.tag-resolved {
+  background: var(--fc-added-bg);
+  color: var(--fc-canopy-30);
+}
+
+/* One option per row, full width: values are often long. */
+.cells {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.cell {
+  display: block;
+  min-width: 0;
+  padding: 0.375rem 0.5rem;
+  border: 1px solid var(--fc-ink-90);
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition:
+    border-color var(--fc-dur-fast) ease,
+    background-color var(--fc-dur-fast) ease;
+}
+
+.cell:hover {
+  border-color: var(--fc-sky-80);
+}
+
+.cell:focus-within {
+  border-color: var(--fc-select);
+}
+
+.cell.chosen {
+  border-color: var(--fc-select);
+  background: var(--fc-select-bg);
+}
+
+.cell.absent .value {
+  color: var(--fc-ink-40);
+  font-style: italic;
+}
+
+.cell-head {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.cell-action {
+  font-weight: 400;
+  color: var(--fc-ink-30);
+}
+
+.cell-action::before {
+  content: "· ";
+  color: var(--fc-ink-60);
+}
+
+.preview {
+  margin-left: auto;
+  font-weight: 400;
+  color: var(--fc-ink-40);
+}
+
+.value {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+/* A value's lines keep their indent; the ones the versions disagree on
+   are marked, so a small difference stands out in a long value. */
+.vline {
+  display: block;
+  white-space: pre-wrap;
+}
+
+.vline-diff {
+  margin: 0 -0.25rem;
+  padding: 0 0.25rem;
+  border-radius: 0.125rem;
+  background: var(--fc-changed-bg);
+  font-weight: 600;
+}
+
+.expand {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+}
+
+.next {
+  margin-top: 1rem;
+}
+
+.issues {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+}
+
+.issue {
+  display: flex;
+  gap: 0.375rem;
+  align-items: flex-start;
+  padding: 0.25rem 0;
+}
+
+.footer {
+  margin-top: 1rem;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .change,
+  .tag,
+  .properties[open] dl {
+    animation: none;
+  }
+  .chevron,
+  .unit,
+  .cell {
+    transition: none;
+  }
+}

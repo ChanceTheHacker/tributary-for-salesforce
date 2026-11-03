@@ -1,0 +1,12 @@
+:host {
+  display: inline-block;
+}
+
+/* The label follows the help colour of a dark page header: SLDS 1 reads
+   neutral-base-30 for it, SLDS 2 the on-surface hooks. */
+.toggle {
+  --slds-g-color-neutral-base-30: var(--fc-help-color, var(--fc-ink-30));
+  --slds-g-color-on-surface-1: var(--fc-help-color, var(--fc-ink-40));
+  --slds-g-color-on-surface-2: var(--fc-help-color, var(--fc-ink-20));
+  --slds-s-label-color: var(--fc-help-color, var(--fc-ink-20));
+}

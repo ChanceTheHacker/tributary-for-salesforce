@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Succeeded__c</fullName>
+    <description
+  >Flows a check read and kept to their approved version. The rest of those attempted failed or were left for the next check.</description>
+    <label>Succeeded</label>
+    <precision>9</precision>
+    <scale>0</scale>
+    <type>Number</type>
+</CustomField>

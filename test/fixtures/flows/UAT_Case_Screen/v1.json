@@ -1,0 +1,250 @@
+{
+  "FullName": "UAT_Case_Screen",
+  "Metadata": {
+    "apiVersion": 62,
+    "status": "Draft",
+    "processMetadataValues": [
+      {
+        "name": "CanvasMode",
+        "value": {
+          "stringValue": "FREE_FORM_CANVAS"
+        }
+      },
+      {
+        "name": "BuilderType",
+        "value": {
+          "stringValue": "LightningFlowBuilder"
+        }
+      }
+    ],
+    "label": "UAT Case Screen",
+    "description": "Look at a case from its page, escalate it and save notes.",
+    "processType": "Flow",
+    "interviewLabel": "UAT Case Screen {!$Flow.CurrentDateTime}",
+    "start": {
+      "locationX": 600,
+      "locationY": 0,
+      "connector": {
+        "targetReference": "Get_Case"
+      }
+    },
+    "recordLookups": [
+      {
+        "label": "Get Case",
+        "name": "Get_Case",
+        "object": "Case",
+        "filterLogic": "and",
+        "filters": [
+          {
+            "field": "Id",
+            "operator": "EqualTo",
+            "value": {
+              "elementReference": "recordId"
+            }
+          }
+        ],
+        "getFirstRecordOnly": true,
+        "storeOutputAutomatically": true,
+        "connector": {
+          "targetReference": "Show_Case"
+        },
+        "faultConnector": {
+          "targetReference": "Show_Error"
+        },
+        "locationX": 600,
+        "locationY": 160
+      }
+    ],
+    "screens": [
+      {
+        "label": "Show Case",
+        "name": "Show_Case",
+        "allowBack": true,
+        "allowFinish": true,
+        "allowPause": false,
+        "showFooter": true,
+        "showHeader": true,
+        "fields": [
+          {
+            "name": "Case_Info",
+            "fieldType": "DisplayText",
+            "fieldText": "<p>Case {!Get_Case.CaseNumber}: {!Get_Case.Subject}</p>"
+          },
+          {
+            "name": "Notes",
+            "dataType": "String",
+            "fieldType": "InputField",
+            "fieldText": "Notes",
+            "isRequired": false
+          }
+        ],
+        "connector": {
+          "targetReference": "Check_Priority"
+        },
+        "locationX": 600,
+        "locationY": 320
+      },
+      {
+        "label": "Confirm Escalation",
+        "name": "Confirm_Escalation",
+        "allowBack": true,
+        "allowFinish": true,
+        "allowPause": false,
+        "showFooter": true,
+        "showHeader": true,
+        "fields": [
+          {
+            "name": "Escalation_Info",
+            "fieldType": "DisplayText",
+            "fieldText": "<p>This case is high priority and will be escalated.</p>"
+          }
+        ],
+        "connector": {
+          "targetReference": "Escalate"
+        },
+        "locationX": 600,
+        "locationY": 640
+      },
+      {
+        "label": "Done",
+        "name": "Done",
+        "allowBack": true,
+        "allowFinish": true,
+        "allowPause": false,
+        "showFooter": true,
+        "showHeader": true,
+        "fields": [
+          {
+            "name": "Done_Info",
+            "fieldType": "DisplayText",
+            "fieldText": "<p>Saved.</p>"
+          }
+        ],
+        "locationX": 470,
+        "locationY": 1120
+      },
+      {
+        "label": "Show Error",
+        "name": "Show_Error",
+        "allowBack": true,
+        "allowFinish": true,
+        "allowPause": false,
+        "showFooter": true,
+        "showHeader": true,
+        "fields": [
+          {
+            "name": "Error_Info",
+            "fieldType": "DisplayText",
+            "fieldText": "<p>{!$Flow.FaultMessage}</p>"
+          }
+        ],
+        "locationX": 730,
+        "locationY": 1120
+      }
+    ],
+    "decisions": [
+      {
+        "label": "Check Priority",
+        "name": "Check_Priority",
+        "rules": [
+          {
+            "name": "High",
+            "label": "High",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "Get_Case.Priority",
+                "operator": "EqualTo",
+                "rightValue": {
+                  "stringValue": "High"
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Confirm_Escalation"
+            }
+          }
+        ],
+        "defaultConnectorLabel": "Otherwise",
+        "defaultConnector": {
+          "targetReference": "Save_Notes"
+        },
+        "locationX": 600,
+        "locationY": 480
+      }
+    ],
+    "recordUpdates": [
+      {
+        "label": "Escalate",
+        "name": "Escalate",
+        "object": "Case",
+        "filterLogic": "and",
+        "filters": [
+          {
+            "field": "Id",
+            "operator": "EqualTo",
+            "value": {
+              "elementReference": "Get_Case.Id"
+            }
+          }
+        ],
+        "inputAssignments": [
+          {
+            "field": "IsEscalated",
+            "value": {
+              "booleanValue": true
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Save_Notes"
+        },
+        "faultConnector": {
+          "targetReference": "Show_Error"
+        },
+        "locationX": 600,
+        "locationY": 800
+      },
+      {
+        "label": "Save Notes",
+        "name": "Save_Notes",
+        "object": "Case",
+        "filterLogic": "and",
+        "filters": [
+          {
+            "field": "Id",
+            "operator": "EqualTo",
+            "value": {
+              "elementReference": "recordId"
+            }
+          }
+        ],
+        "inputAssignments": [
+          {
+            "field": "Comments",
+            "value": {
+              "elementReference": "Notes"
+            }
+          }
+        ],
+        "connector": {
+          "targetReference": "Done"
+        },
+        "faultConnector": {
+          "targetReference": "Show_Error"
+        },
+        "locationX": 600,
+        "locationY": 960
+      }
+    ],
+    "variables": [
+      {
+        "name": "recordId",
+        "dataType": "String",
+        "isCollection": false,
+        "isInput": true,
+        "isOutput": false
+      }
+    ]
+  }
+}

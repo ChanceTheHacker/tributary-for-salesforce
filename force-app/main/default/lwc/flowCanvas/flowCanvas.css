@@ -1,0 +1,577 @@
+@import "c/flowTokens";
+
+:host {
+  display: block;
+  height: 100%;
+  --fc-line: var(--fc-ink-60);
+}
+
+.frame {
+  position: relative;
+  height: 100%;
+  min-height: 240px;
+  border: 1px solid var(--fc-ink-90);
+  border-radius: 0.25rem;
+  overflow: hidden;
+  background: var(--fc-ink-95);
+}
+
+.toolbar {
+  position: absolute;
+  z-index: 2;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--fc-ink-90);
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 6px rgba(15, 42, 29, 0.08);
+}
+
+.find {
+  position: absolute;
+  z-index: 3;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.25rem 0.25rem 0.5rem;
+  background: #fff;
+  border: 1px solid var(--fc-ink-80);
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 6px rgba(15, 42, 29, 0.12);
+  animation: find-in var(--fc-dur) var(--fc-ease-out) backwards;
+}
+
+.find:focus-within {
+  border-color: var(--fc-select);
+  box-shadow:
+    0 0 0 1px var(--fc-select),
+    0 2px 6px rgba(15, 42, 29, 0.12);
+}
+
+.find-icon {
+  --slds-c-icon-color-foreground-default: var(--fc-ink-50);
+}
+
+.find-input {
+  width: 11rem;
+  border: 0;
+  outline: none;
+  font-size: 0.8125rem;
+  line-height: 1.5rem;
+  background: transparent;
+}
+
+.find-count {
+  min-width: 4.5rem;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--fc-ink-40);
+  text-align: right;
+  white-space: nowrap;
+}
+
+@keyframes find-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.zoom {
+  min-width: 3rem;
+  text-align: center;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--fc-ink-30);
+}
+
+.viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  outline: none;
+  background-image: radial-gradient(var(--fc-ink-80) 1px, transparent 1px);
+}
+
+.viewport:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--fc-select);
+}
+
+.viewport:active {
+  cursor: grabbing;
+}
+
+.world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  animation: world-in var(--fc-dur-slow) var(--fc-ease-out) backwards;
+}
+
+/* Moves the canvas makes itself glide; dragging and scrolling don't. */
+.world.glide {
+  transition: transform var(--fc-dur-slow) var(--fc-ease-inout);
+}
+.viewport.glide {
+  transition:
+    background-size var(--fc-dur-slow) var(--fc-ease-inout),
+    background-position var(--fc-dur-slow) var(--fc-ease-inout);
+}
+
+@keyframes world-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.edges {
+  position: absolute;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.edge {
+  transition: opacity var(--fc-dur) ease;
+}
+
+.edge-line {
+  fill: none;
+  stroke: var(--fc-line);
+  stroke-width: 1.5;
+  transition: stroke var(--fc-dur) ease;
+}
+
+.edge-arrow {
+  fill: var(--fc-line);
+  transition: fill var(--fc-dur) ease;
+}
+
+.kind-fault .edge-line,
+.goto .edge-line {
+  stroke-dasharray: 6 4;
+}
+
+.edge-added .edge-line,
+.edge-removed .edge-line,
+.edge-changed .edge-line {
+  stroke-width: 2.5;
+}
+
+.edge-added .edge-line {
+  stroke: var(--fc-added);
+}
+.edge-added .edge-arrow {
+  fill: var(--fc-added);
+}
+.edge-removed .edge-line {
+  stroke: var(--fc-removed);
+  stroke-dasharray: 5 4;
+}
+.edge-removed .edge-arrow {
+  fill: var(--fc-removed);
+}
+.edge-changed .edge-line {
+  stroke: var(--fc-changed);
+}
+.edge-changed .edge-arrow {
+  fill: var(--fc-changed);
+}
+
+.edge-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 0.5rem;
+  font-size: 0.6875rem;
+  line-height: 1.25rem;
+  color: var(--fc-ink-30);
+  background: #fff;
+  border: 1px solid var(--fc-ink-80);
+  border-radius: 1rem;
+  pointer-events: none;
+}
+
+.edge-label.kind-fault {
+  color: var(--fc-gold-40);
+}
+
+.edge-label-added {
+  color: var(--fc-added-text);
+  border-color: var(--fc-added);
+  background: var(--fc-added-bg);
+}
+.edge-label-removed {
+  color: var(--fc-removed-text);
+  border-color: var(--fc-removed);
+  background: var(--fc-removed-bg);
+  text-decoration: line-through;
+}
+.edge-label-changed {
+  color: var(--fc-changed-text);
+  border-color: var(--fc-changed);
+  background: var(--fc-changed-bg);
+}
+
+.node {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  outline: 2px solid transparent;
+  outline-offset: 4px;
+  border-radius: 0.5rem;
+  transition:
+    outline-color var(--fc-dur-fast) ease,
+    background-color var(--fc-dur-fast) ease,
+    opacity var(--fc-dur) ease;
+}
+
+.tile {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 0.5rem;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(15, 42, 29, 0.18);
+  transition:
+    box-shadow var(--fc-dur) ease,
+    opacity var(--fc-dur) ease,
+    transform var(--fc-dur-fast) var(--fc-ease-out);
+}
+
+.node:hover .tile {
+  transform: translateY(-2px);
+}
+
+.node:active .tile {
+  transform: translateY(0) scale(0.97);
+}
+
+/* A sunlit-gold ring that swells out once when stepping or jumping to an element. */
+.tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+}
+.flash-0 .tile::after {
+  animation: flash-0 900ms var(--fc-ease-out);
+}
+.flash-1 .tile::after {
+  animation: flash-1 900ms var(--fc-ease-out);
+}
+
+@keyframes flash-0 {
+  from {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(242, 181, 58, 0.8);
+  }
+  to {
+    opacity: 0;
+    box-shadow: 0 0 0 18px rgba(242, 181, 58, 0);
+  }
+}
+@keyframes flash-1 {
+  from {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(242, 181, 58, 0.8);
+  }
+  to {
+    opacity: 0;
+    box-shadow: 0 0 0 18px rgba(242, 181, 58, 0);
+  }
+}
+
+.tile-icon {
+  display: block;
+}
+
+.label,
+.type {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 0.25rem;
+  line-height: 16px;
+  background: #fff;
+  border-radius: 0.25rem;
+}
+
+.label {
+  margin-top: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--fc-ink-10);
+  transition:
+    background-color var(--fc-dur) ease,
+    color var(--fc-dur) ease;
+}
+
+.type {
+  font-size: 0.6875rem;
+  color: var(--fc-ink-40);
+  transition: opacity var(--fc-dur) ease;
+}
+
+.node:hover {
+  outline-color: var(--fc-sky-80);
+}
+
+.node.selected {
+  outline-color: var(--fc-select);
+  background-color: rgba(42, 111, 214, 0.06);
+}
+
+/* While finding, what doesn't match fades back and matches get a marker. */
+.finding .node {
+  opacity: 0.3;
+}
+.finding .edge,
+.finding .edge-label {
+  opacity: 0.35;
+}
+.finding .node.match,
+.finding .node.selected,
+.finding .node:focus-visible {
+  opacity: 1;
+}
+.finding .match .label {
+  box-shadow: inset 0 -2px 0 var(--fc-select);
+}
+.node.match-current {
+  outline-color: var(--fc-select);
+  outline-style: dashed;
+}
+.node.match-current.selected {
+  outline-style: solid;
+}
+
+/* Keyboard focus shows at once and differs from selection: a halo too. */
+.node:focus-visible {
+  outline-color: var(--fc-select);
+  box-shadow: 0 0 0 8px rgba(42, 111, 214, 0.18);
+  transition: none;
+}
+
+.status-added .tile {
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 5px var(--fc-added);
+}
+.status-added .label {
+  background: var(--fc-added-bg);
+  color: var(--fc-canopy-30);
+}
+
+.status-removed .tile {
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 5px var(--fc-removed);
+  opacity: 0.85;
+}
+.status-removed .label {
+  background: var(--fc-removed-bg);
+  color: var(--fc-macaw-30);
+  text-decoration: line-through;
+}
+
+.status-changed .tile {
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 5px var(--fc-changed);
+}
+.status-changed .label {
+  background: var(--fc-changed-bg);
+  color: var(--fc-gold-30);
+}
+
+.status-excluded {
+  opacity: 0.5;
+}
+.status-excluded .tile {
+  box-shadow: none;
+  outline: 2px dashed var(--fc-ink-50);
+  outline-offset: 3px;
+}
+.status-excluded .label {
+  font-style: italic;
+  font-weight: 400;
+}
+.status-excluded:hover,
+.status-excluded.selected {
+  opacity: 0.85;
+}
+
+/* Fading keeps names readable, and brings back what's pointed at. */
+.dim-unchanged .status-unchanged .tile,
+.dim-unchanged .status-unchanged .type {
+  opacity: 0.4;
+}
+.dim-unchanged .status-unchanged .label {
+  color: var(--fc-ink-40);
+}
+.dim-unchanged .status-unchanged:hover .tile,
+.dim-unchanged .status-unchanged:focus-visible .tile,
+.dim-unchanged .status-unchanged.selected .tile,
+.dim-unchanged .status-unchanged:hover .type,
+.dim-unchanged .status-unchanged:focus-visible .type,
+.dim-unchanged .status-unchanged.selected .type {
+  opacity: 1;
+}
+.dim-unchanged .edge-unchanged {
+  opacity: 0.35;
+}
+
+.badges {
+  position: absolute;
+  top: -8px;
+  right: -12px;
+  display: flex;
+  gap: 2px;
+}
+
+.badge {
+  animation: badge-in var(--fc-dur) var(--fc-ease-out) backwards;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  color: #fff;
+  border: 1px solid #fff;
+}
+
+.badge-changed {
+  background: var(--fc-changed);
+  color: var(--fc-ink-10);
+}
+.badge-conflict,
+.badge-error {
+  background: var(--fc-removed);
+}
+.badge-warning {
+  background: var(--fc-sun);
+  color: var(--fc-ink-10);
+}
+
+.has-conflict .tile {
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 5px var(--fc-removed);
+  animation: pulse 1.6s var(--fc-ease-inout) 3;
+}
+
+@keyframes pulse {
+  50% {
+    box-shadow:
+      0 0 0 2px #fff,
+      0 0 0 8px rgba(215, 57, 43, 0.35);
+  }
+}
+
+.state-glyph {
+  position: absolute;
+  z-index: 1;
+  left: -12px;
+  bottom: -4px;
+  width: 22px;
+  height: 22px;
+  line-height: 20px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--fc-ink-10);
+  background: #fff;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+}
+
+.moved {
+  position: absolute;
+  left: -10px;
+  top: -8px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: #fff;
+  border: 1px solid var(--fc-ink-50);
+}
+
+.pick {
+  margin-top: 2px;
+  padding: 0 0.375rem;
+  font-size: 0.625rem;
+  line-height: 14px;
+  color: var(--fc-river-20);
+  background: var(--fc-river-90);
+  border-radius: 7px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fc-ink-40);
+  pointer-events: none;
+}
+
+@keyframes badge-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world,
+  .find,
+  .badge,
+  .has-conflict .tile,
+  .flash-0 .tile::after,
+  .flash-1 .tile::after {
+    animation: none;
+  }
+  .world.glide,
+  .viewport.glide,
+  .node,
+  .tile,
+  .label,
+  .type,
+  .edge,
+  .edge-line,
+  .edge-arrow {
+    transition: none;
+  }
+  .node:hover .tile,
+  .node:active .tile {
+    transform: none;
+  }
+}

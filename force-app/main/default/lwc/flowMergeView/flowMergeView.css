@@ -1,0 +1,383 @@
+@import "c/flowTokens";
+
+:host {
+  display: block;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  padding-bottom: 0.5rem;
+}
+
+.save-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.save-note {
+  font-size: 0.75rem;
+  color: var(--fc-ink-40);
+  animation: fade-in var(--fc-dur) ease backwards;
+}
+
+.history,
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.position {
+  min-width: 11rem;
+  padding: 0 0.5rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--fc-ink-30);
+}
+
+.status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  padding-bottom: 0.5rem;
+}
+
+.chip {
+  padding: 0.125rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--fc-ink-95);
+  color: var(--fc-ink-30);
+  animation: pop-in var(--fc-dur) var(--fc-ease-out) backwards;
+}
+.chip-ok {
+  background: var(--fc-canopy-95);
+  color: var(--fc-canopy-30);
+}
+.chip-warning {
+  background: var(--fc-gold-95);
+  color: var(--fc-gold-30);
+}
+.chip-error {
+  background: var(--fc-macaw-95);
+  color: var(--fc-macaw-30);
+}
+
+/* In document flow, so it cannot cover zoom or Find at narrow widths. */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem 1rem;
+  padding-bottom: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--fc-ink-30);
+}
+
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 24rem;
+  gap: 0.75rem;
+  height: var(--fc-fill-height, calc(100vh - 18rem));
+  min-height: 26rem;
+}
+
+@media (max-width: 64em) {
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+  }
+  .main {
+    height: 70vh;
+  }
+}
+
+.main {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+}
+
+.canvas {
+  display: block;
+  height: 100%;
+}
+
+.side {
+  position: relative;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--fc-ink-90);
+  border-radius: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  background: #fff;
+}
+
+/* A newly opened element or tab slides in from the canvas side. */
+.side > * {
+  display: block;
+  animation: slide-in var(--fc-dur) var(--fc-ease-out) backwards;
+}
+.side > .tabs {
+  display: flex;
+  animation: none;
+}
+.tab-panel {
+  animation: fade-in var(--fc-dur) ease backwards;
+}
+
+/* Keep one tab row; arrow-key focus scrolls each tab into reach. */
+.tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 0 0.25rem;
+  border-bottom: 1px solid var(--fc-ink-90);
+  margin-bottom: 0.5rem;
+}
+
+.tab {
+  flex: none;
+  white-space: nowrap;
+  margin-bottom: -1px;
+  padding: 0.375rem 0.5rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0.25rem 0.25rem 0 0;
+  background: none;
+  color: var(--fc-ink-30);
+  cursor: pointer;
+  transition:
+    color var(--fc-dur-fast) ease,
+    border-color var(--fc-dur) var(--fc-ease-out),
+    background-color var(--fc-dur-fast) ease;
+}
+
+.tab:hover {
+  background: var(--fc-ink-95);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--fc-select);
+  outline-offset: -2px;
+}
+
+.tab-active {
+  border-bottom-color: var(--fc-brand);
+  color: var(--fc-brand);
+  font-weight: 700;
+}
+
+.row-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
+
+.rows {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.25rem;
+}
+
+.page-text {
+  color: var(--fc-ink-40);
+  text-align: center;
+}
+
+/* The name keeps at least half the row; a long status wraps instead. */
+.row {
+  display: grid;
+  grid-template-columns: minmax(50%, 1fr) auto;
+  align-items: start;
+  gap: 0.375rem 0.5rem;
+  padding: 0.5rem 0.25rem;
+  border-bottom: 1px solid var(--fc-ink-95);
+  box-shadow: inset 0 0 0 transparent;
+  transition:
+    background-color var(--fc-dur) ease,
+    box-shadow var(--fc-dur) ease;
+}
+
+.row-conflict {
+  padding-left: 0.5rem;
+  background: var(--fc-macaw-97);
+  box-shadow: inset 3px 0 0 var(--fc-macaw-40);
+}
+
+.row-current {
+  background: var(--fc-select-bg);
+  box-shadow: inset 3px 0 0 var(--fc-select);
+}
+
+.row-title,
+.problem-text {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.375rem;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  text-align: left;
+  color: var(--fc-link);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.row-title:hover .row-name > :first-child,
+.problem-text:hover {
+  text-decoration: underline;
+}
+
+.row-title lightning-icon {
+  margin-top: 0.125rem;
+}
+
+.row-static {
+  color: var(--fc-ink-10);
+  cursor: default;
+}
+
+.row-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.row-detail {
+  font-size: 0.75rem;
+  color: var(--fc-ink-40);
+}
+
+.row-status {
+  font-size: 0.75rem;
+  color: var(--fc-ink-40);
+  text-align: right;
+  text-wrap: pretty;
+}
+
+.row-pick {
+  grid-column: 1 / -1;
+}
+
+/* A flow property has no details panel, so its values show in the row. */
+.row-values {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  font-size: 0.75rem;
+}
+
+.row-value dt {
+  color: var(--fc-ink-40);
+}
+
+.row-value dd {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.problem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.375rem 0;
+  border-bottom: 1px solid var(--fc-ink-95);
+}
+
+.problem-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.empty,
+.hint {
+  color: var(--fc-ink-40);
+  padding: 0.5rem 0;
+}
+
+/* A different flow's mapping problems, above its XML merge. */
+.text-mapping {
+  margin-bottom: 0.5rem;
+}
+
+.text-mapping .hint {
+  padding-bottom: 0;
+}
+
+/* Switching between visual and XML merge fades the new view in. */
+.canvas-mode,
+.text-mode {
+  animation: fade-in var(--fc-dur) ease backwards;
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canvas-mode,
+  .text-mode,
+  .side > *,
+  .tab-panel,
+  .chip,
+  .save-note {
+    animation: none;
+  }
+  .tab,
+  .row {
+    transition: none;
+  }
+}
+
+.tab-panel > .hint {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  font-size: 0.75rem;
+  color: var(--fc-ink-40);
+}
+
+.group-select {
+  grid-column: 1 / -1;
+  justify-self: start;
+}

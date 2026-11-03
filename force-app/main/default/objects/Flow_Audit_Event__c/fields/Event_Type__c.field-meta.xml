@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Event_Type__c</fullName>
+    <description />
+    <label>Event Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Requested</fullName>
+                <default>false</default>
+                <label>Requested</label>
+            </value>
+            <value>
+                <fullName>Approved</fullName>
+                <default>false</default>
+                <label>Approved</label>
+            </value>
+            <value>
+                <fullName>Rejected</fullName>
+                <default>false</default>
+                <label>Rejected</label>
+            </value>
+            <value>
+                <fullName>Cancelled</fullName>
+                <default>false</default>
+                <label>Cancelled</label>
+            </value>
+            <value>
+                <fullName>Activated</fullName>
+                <default>false</default>
+                <label>Activated</label>
+            </value>
+            <value>
+                <fullName>Activation Failed</fullName>
+                <default>false</default>
+                <label>Activation Failed</label>
+            </value>
+            <value>
+                <fullName>Unapproved Activation</fullName>
+                <default>false</default>
+                <label>Unapproved Activation</label>
+            </value>
+            <value>
+                <fullName>Reverted</fullName>
+                <default>false</default>
+                <label>Reverted</label>
+            </value>
+            <value>
+                <fullName>Revert Failed</fullName>
+                <default>false</default>
+                <label>Revert Failed</label>
+            </value>
+            <value>
+                <fullName>Owner Activation Accepted</fullName>
+                <default>false</default>
+                <label>Owner Activation Accepted</label>
+            </value>
+            <value>
+                <fullName>Baseline Recorded</fullName>
+                <default>false</default>
+                <label>Baseline Recorded</label>
+            </value>
+            <value>
+                <fullName>Version Saved</fullName>
+                <default>false</default>
+                <label>Version Saved</label>
+            </value>
+            <value>
+                <fullName>Flow Created</fullName>
+                <default>false</default>
+                <label>Flow Created</label>
+            </value>
+            <value>
+                <fullName>Governance Changed</fullName>
+                <default>false</default>
+                <label>Governance Changed</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

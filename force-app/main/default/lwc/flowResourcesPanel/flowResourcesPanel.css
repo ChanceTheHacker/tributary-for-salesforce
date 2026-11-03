@@ -1,0 +1,237 @@
+@import "c/flowTokens";
+
+:host {
+  display: block;
+}
+
+/* The side panel around it already pads; this adds only a little. */
+.panel {
+  padding: 0.25rem 0;
+  font-size: 0.8125rem;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.section {
+  margin: 0.75rem 0 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--fc-ink-20);
+}
+
+.resources {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.resource {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "icon name status" "icon type status";
+  column-gap: 0.5rem;
+  align-items: center;
+  width: 100%;
+  padding: 0.375rem 0.5rem;
+  border: 0;
+  border-left: 3px solid transparent;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.resource:hover,
+.resource:focus-visible {
+  background: var(--fc-ink-95);
+}
+
+.resource.selected {
+  background: var(--fc-select-bg);
+}
+
+.resource lightning-icon {
+  grid-area: icon;
+}
+
+.name {
+  grid-area: name;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.type {
+  grid-area: type;
+  font-size: 0.6875rem;
+  color: var(--fc-ink-40);
+}
+
+.status {
+  grid-area: status;
+  font-size: 0.6875rem;
+}
+
+.status-added {
+  border-left-color: var(--fc-canopy-50);
+}
+.status-added .status {
+  color: var(--fc-canopy-50);
+}
+.status-removed {
+  border-left-color: var(--fc-macaw-40);
+}
+.status-removed .status {
+  color: var(--fc-macaw-40);
+}
+.status-removed .name {
+  text-decoration: line-through;
+}
+.status-changed {
+  border-left-color: var(--fc-gold-60);
+}
+.status-changed .status {
+  color: var(--fc-gold-40);
+}
+
+.none {
+  color: var(--fc-ink-40);
+}
+
+.props {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.props th,
+.props td {
+  padding: 0.375rem;
+  border-top: 1px solid var(--fc-ink-90);
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+/* Lists and records read as indented lines. */
+.props td,
+.value {
+  white-space: pre-wrap;
+}
+
+.props .before {
+  background: var(--fc-macaw-95);
+}
+.props .after {
+  background: var(--fc-canopy-95);
+}
+
+/* The change Previous/Next reached. */
+.props .selected th {
+  box-shadow: inset 3px 0 0 var(--fc-select);
+  background: var(--fc-select-bg);
+}
+
+.unit {
+  margin: 0 0 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--fc-ink-90);
+  border-radius: 0.25rem;
+}
+
+.unit-conflict {
+  border-color: var(--fc-macaw-40);
+}
+
+.unit-label {
+  font-weight: 600;
+  padding: 0 0.25rem;
+}
+
+.tag {
+  margin-left: 0.5rem;
+  padding: 0 0.375rem;
+  border-radius: 1rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.125rem;
+  animation: pop-in var(--fc-dur) var(--fc-ease-out) backwards;
+}
+.tag-conflict {
+  background: var(--fc-macaw-95);
+  color: var(--fc-macaw-30);
+}
+.tag-resolved {
+  background: var(--fc-canopy-95);
+  color: var(--fc-canopy-30);
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tag {
+    animation: none;
+  }
+}
+
+.cells {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  gap: 0.375rem;
+}
+
+.cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.375rem;
+  border: 1px solid var(--fc-ink-90);
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.cell.chosen {
+  border-color: var(--fc-select);
+  background: var(--fc-select-bg);
+}
+
+.cell-side {
+  font-weight: 600;
+}
+
+.text-editor {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--fc-ink-90);
+}
+
+.text-editor summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.text-editor lightning-button {
+  display: inline-block;
+  margin: 0.5rem 0.5rem 0 0;
+}
+
+.custom-text {
+  margin-top: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  unicode-bidi: plaintext;
+}
+
+.value {
+  flex-basis: 100%;
+  overflow-wrap: anywhere;
+}

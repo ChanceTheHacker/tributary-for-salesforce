@@ -1,0 +1,91 @@
+<template>
+  <section class="panel" aria-label={title}>
+    <header class="head">
+      <lightning-icon
+        icon-name="utility:multi_select_checkbox"
+        size="small"
+        class="icon"
+      ></lightning-icon>
+      <h2 class="slds-text-heading_small title">{title}</h2>
+      <lightning-button-icon
+        icon-name="utility:close"
+        variant="bare"
+        alternative-text="Clear the selection"
+        title="Clear the selection"
+        onclick={handleClear}
+      ></lightning-button-icon>
+    </header>
+    <p class="hint">
+      Shift-click or Ctrl-click elements on the canvas, or press Shift+Enter on
+      one, to add or take them out.
+    </p>
+
+    <ul class="members">
+      <template for:each={rows} for:item="row">
+        <li key={row.key} class="member">
+          <lightning-icon
+            icon-name={row.icon}
+            size="x-small"
+            alternative-text=""
+          ></lightning-icon>
+          <button
+            class="member-name"
+            title={row.openLabel}
+            data-key={row.key}
+            onclick={handleOpen}
+          >
+            <span>{row.name}</span>
+            <span class="member-detail">{row.type} · {row.origin}</span>
+          </button>
+          <span class={row.resultClass}>{row.resultText}</span>
+          <lightning-button-icon
+            icon-name="utility:close"
+            variant="bare"
+            size="small"
+            alternative-text={row.unmarkLabel}
+            title={row.unmarkLabel}
+            data-key={row.key}
+            onclick={handleUnmark}
+          ></lightning-button-icon>
+        </li>
+      </template>
+    </ul>
+
+    <template lwc:if={mixed}>
+      <p class="hint mixed-warning" role="status">
+        These elements currently combine versions. Taking them all from one
+        version or putting them on a path replaces their individual edits. Keep
+        the mix by opening and reviewing each element instead.
+      </p>
+    </template>
+    <h3 class="section">Take them all from</h3>
+    <lightning-button-group class="sides">
+      <template for:each={sideButtons} for:item="button">
+        <lightning-button
+          key={button.side}
+          label={button.label}
+          title={button.title}
+          data-side={button.side}
+          onclick={handleSide}
+        ></lightning-button>
+      </template>
+    </lightning-button-group>
+
+    <template lwc:if={canPlace}>
+      <h3 class="section">Put them on a path</h3>
+      <c-flow-place
+        model={model}
+        merge={merge}
+        resolved={resolved}
+        picks={picks}
+        keys={placeKeys}
+        side={placeSide}
+        exclude={placeKeys}
+        label="After"
+        button-label="Put them here"
+        hint={placeHint}
+        onplace={handlePlace}
+      ></c-flow-place>
+    </template>
+  </section>
+</template>

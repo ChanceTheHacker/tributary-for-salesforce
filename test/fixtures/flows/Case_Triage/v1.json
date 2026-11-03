@@ -1,0 +1,80 @@
+{
+  "FullName": "Case_Triage",
+  "Metadata": {
+    "label": "Case Triage",
+    "processType": "AutoLaunchedFlow",
+    "processMetadataValues": [
+      {
+        "name": "CanvasMode",
+        "value": {
+          "stringValue": "FREE_FORM_CANVAS"
+        }
+      }
+    ],
+    "start": {
+      "locationX": 50,
+      "locationY": 0,
+      "object": "Case",
+      "triggerType": "RecordAfterSave",
+      "recordTriggerType": "CreateAndUpdate",
+      "connector": {
+        "targetReference": "Check_Priority"
+      }
+    },
+    "decisions": [
+      {
+        "name": "Check_Priority",
+        "label": "Check Priority",
+        "locationX": 50,
+        "locationY": 150,
+        "defaultConnectorLabel": "Default",
+        "rules": [
+          {
+            "name": "High",
+            "label": "High",
+            "conditionLogic": "and",
+            "conditions": [
+              {
+                "leftValueReference": "$Record.Priority",
+                "operator": "EqualTo",
+                "rightValue": {
+                  "stringValue": "High"
+                }
+              }
+            ],
+            "connector": {
+              "targetReference": "Escalate"
+            }
+          }
+        ]
+      }
+    ],
+    "recordUpdates": [
+      {
+        "name": "Escalate",
+        "label": "Escalate",
+        "locationX": 50,
+        "locationY": 300,
+        "inputReference": "$Record",
+        "inputAssignments": [
+          {
+            "field": "IsEscalated",
+            "value": {
+              "booleanValue": true
+            }
+          }
+        ]
+      }
+    ],
+    "variables": [
+      {
+        "name": "note",
+        "dataType": "Number",
+        "scale": 0,
+        "isCollection": false,
+        "isInput": false,
+        "isOutput": false
+      }
+    ]
+  }
+}

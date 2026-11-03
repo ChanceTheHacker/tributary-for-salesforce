@@ -1,0 +1,64 @@
+<template>
+  <template lwc:if={receipt}>
+    <div class="receipt">
+      <template lwc:if={hasDecisions}>
+        <h3 class="heading">Decided</h3>
+        <ul class="decisions">
+          <template for:each={decisions} for:item="decision">
+            <li key={decision.key}>{decision.text}</li>
+          </template>
+        </ul>
+      </template>
+      <h3 class="heading">Checked</h3>
+      <ul class="checks">
+        <template for:each={checks} for:item="check">
+          <li key={check.key} class={check.rowClass}>
+            <lightning-icon
+              icon-name={check.iconName}
+              size="x-small"
+              variant={check.variant}
+              alternative-text={check.statusText}
+              title={check.statusText}
+            ></lightning-icon>
+            <div>
+              <p>
+                <span class="check-title">{check.title}:</span>
+                {check.summary}
+              </p>
+              <p class="aside">{check.detail}</p>
+              <template lwc:if={check.hasMessages}>
+                <ul class="messages">
+                  <template for:each={check.messageList} for:item="message">
+                    <li key={message.key}>{message.text}</li>
+                  </template>
+                </ul>
+              </template>
+            </div>
+          </li>
+        </template>
+      </ul>
+      <details class="technical">
+        <summary>Technical details</summary>
+        <h3 class="heading">Fingerprint</h3>
+        <p class="fingerprint">
+          <code title={receipt.candidate}>{receipt.short}</code>
+          <span class="aside">
+            SHA-256 of the exact flow saved, as a draft with its label and
+            description. {fingerprintNote}
+          </span>
+        </p>
+        <template lwc:if={hasSources}>
+          <h3 class="heading">Made from</h3>
+          <ul class="sources">
+            <template for:each={receipt.sources} for:item="source">
+              <li key={source.key}>
+                <span class="source-label">{source.label}:</span>
+                <span class="aside">{source.text}</span>
+              </li>
+            </template>
+          </ul>
+        </template>
+      </details>
+    </div>
+  </template>
+</template>

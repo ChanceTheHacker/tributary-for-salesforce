@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
+    <brand>
+        <headerColor>#0B3B3F</headerColor>
+        <shouldOverrideOrgTheme>false</shouldOverrideOrgTheme>
+    </brand>
+    <description
+  >Compare, merge and approve flows: see what changed on the canvas, merge versions or different flows, and govern who can activate them.</description>
+    <formFactors>Large</formFactors>
+    <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
+    <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
+    <label>Tributary</label>
+    <navType>Standard</navType>
+    <tabs>Flow_Compare</tabs>
+    <tabs>Flow_Approvals</tabs>
+    <tabs>Governed_Flows</tabs>
+    <tabs>Flow_Compare_Setup</tabs>
+    <uiType>Lightning</uiType>
+</CustomApplication>

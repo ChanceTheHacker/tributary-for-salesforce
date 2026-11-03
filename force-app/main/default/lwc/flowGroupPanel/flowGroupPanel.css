@@ -1,0 +1,92 @@
+@import "c/flowTokens";
+
+:host {
+  display: block;
+}
+
+.panel {
+  padding: 0.25rem 0;
+  font-size: 0.8125rem;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+}
+
+.hint {
+  margin-top: 0.25rem;
+  color: var(--fc-ink-40);
+  font-size: 0.75rem;
+}
+
+.members {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.member {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.375rem;
+  border: 1px solid var(--fc-ink-90);
+  border-radius: 0.25rem;
+}
+
+.member-name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  color: var(--fc-link);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.member-name:hover span:first-child {
+  text-decoration: underline;
+}
+.member-name:focus-visible {
+  outline: 2px solid var(--fc-select);
+  outline-offset: 2px;
+}
+
+.member-detail {
+  color: var(--fc-ink-40);
+  font-size: 0.75rem;
+}
+
+.state {
+  flex: none;
+  padding: 0 0.375rem;
+  border-radius: 1rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.25rem;
+}
+.state-in {
+  background: var(--fc-added-bg);
+  color: var(--fc-canopy-30);
+}
+.state-out {
+  background: var(--fc-ink-90);
+  color: var(--fc-ink-30);
+}
+
+.section {
+  margin: 1rem 0 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--fc-ink-20);
+}

@@ -1,0 +1,436 @@
+/*
+ * Tributary's shared colours and motion, imported by every component
+ * with @import "c/flowTokens".
+ *
+ * The palette is the launch trailer's: jungle, deep river, river teal,
+ * sunlit gold, macaw red, macaw blue and cream. Each colour is stretched
+ * into a ramp whose steps have the same contrast against white as the
+ * Salesforce ramp step of the same number, so river-50 can stand in for
+ * brand-50 and ink-40 for neutral-40 without changing legibility. Steps 50
+ * and below carry white text, 40 and below any text on a tint.
+ *
+ * Roles: river is the brand (buttons, links, active tabs); macaw blue
+ * (sky) marks focus, selection and where you are; changes are gold,
+ * additions canopy green, removals macaw red; ink is the jungle-tinted
+ * text and warm sand neutrals.
+ *
+ * The --slds-g-* and --lwc-* block at the end hands the same palette to
+ * the Salesforce base components inside each Tributary component, so
+ * their buttons, inputs, toggles and focus rings match.
+ */
+:host {
+  /* the trailer's colours */
+  --fc-jungle: #0f2a1d;
+  --fc-deep: #0b3b3f;
+  --fc-teal: #1f8a87;
+  --fc-sun: #f2b53a;
+  --fc-macaw: #d7392b;
+  --fc-macaw-blue: #2a6fd6;
+  --fc-cream: #f6efdc;
+
+  --fc-river-10: #011b1a;
+  --fc-river-20: #0b3b3f;
+  --fc-river-30: #034d4c;
+  --fc-river-40: #0c6664;
+  --fc-river-50: #138280;
+  --fc-river-60: #47a19e;
+  --fc-river-70: #73bab6;
+  --fc-river-80: #a2d3d0;
+  --fc-river-90: #d2eae9;
+  --fc-river-95: #eaf6f5;
+
+  --fc-canopy-20: #003710;
+  --fc-canopy-30: #03501d;
+  --fc-canopy-40: #17692d;
+  --fc-canopy-50: #2f8442;
+  --fc-canopy-60: #58a465;
+  --fc-canopy-70: #7ebc86;
+  --fc-canopy-80: #a9d4ae;
+  --fc-canopy-90: #d4ebd7;
+  --fc-canopy-95: #ecf6ed;
+
+  --fc-macaw-20: #640301;
+  --fc-macaw-30: #8c0c06;
+  --fc-macaw-40: #b41c12;
+  --fc-macaw-50: #d7392b;
+  --fc-macaw-60: #f36755;
+  --fc-macaw-70: #fe8e7e;
+  --fc-macaw-80: #feb8ad;
+  --fc-macaw-90: #ffded9;
+  --fc-macaw-95: #fff1ee;
+  --fc-macaw-97: #fff8f7;
+
+  --fc-gold-20: #3f2a02;
+  --fc-gold-30: #5d3f04;
+  --fc-gold-40: #7b5506;
+  --fc-gold-50: #9a6c0b;
+  --fc-gold-60: #c18919;
+  --fc-gold-70: #e2a226;
+  --fc-gold-80: #fdbe54;
+  --fc-gold-90: #fee2b6;
+  --fc-gold-95: #fff2df;
+
+  --fc-sky-20: #022c66;
+  --fc-sky-30: #024094;
+  --fc-sky-40: #1558b9;
+  --fc-sky-50: #2a6fd6;
+  --fc-sky-60: #5694f1;
+  --fc-sky-70: #7daffe;
+  --fc-sky-80: #aacbff;
+  --fc-sky-90: #d7e7ff;
+  --fc-sky-95: #eef4ff;
+
+  --fc-ink-10: #111a15;
+  --fc-ink-15: #1c2721;
+  --fc-ink-20: #26312b;
+  --fc-ink-30: #3b4740;
+  --fc-ink-40: #535f58;
+  --fc-ink-50: #6a7770;
+  --fc-ink-60: #96938a;
+  --fc-ink-65: #a4a096;
+  --fc-ink-70: #b2aea4;
+  --fc-ink-80: #cdc8bf;
+  --fc-ink-90: #e9e4db;
+  --fc-ink-95: #f7f3e8;
+  --fc-ink-97: #fcf9f0;
+
+  /* roles */
+  --fc-brand: var(--fc-river-50);
+  --fc-brand-hover: var(--fc-river-40);
+  --fc-brand-active: var(--fc-river-30);
+  --fc-link: var(--fc-river-40);
+  --fc-link-hover: var(--fc-river-30);
+  --fc-select: var(--fc-sky-50);
+  --fc-select-bg: var(--fc-sky-95);
+  --fc-focus: var(--fc-sky-40);
+
+  --fc-added: var(--fc-canopy-50);
+  --fc-added-bg: var(--fc-canopy-95);
+  --fc-added-text: var(--fc-canopy-40);
+  --fc-removed: var(--fc-macaw-50);
+  --fc-removed-bg: var(--fc-macaw-95);
+  --fc-removed-text: var(--fc-macaw-40);
+  --fc-changed: var(--fc-gold-60);
+  --fc-changed-bg: var(--fc-gold-95);
+  --fc-changed-text: var(--fc-gold-40);
+
+  /* motion */
+  --fc-dur-fast: 120ms;
+  --fc-dur: 200ms;
+  --fc-dur-slow: 320ms;
+  --fc-ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --fc-ease-inout: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Salesforce base components: brand */
+  --slds-g-color-brand-base-10: #011b1a;
+  --slds-g-color-brand-base-15: #012928;
+  --slds-g-color-brand-base-20: var(--fc-river-20);
+  --slds-g-color-brand-base-30: var(--fc-river-30);
+  --slds-g-color-brand-base-40: var(--fc-river-40);
+  --slds-g-color-brand-base-50: var(--fc-river-50);
+  --slds-g-color-brand-base-60: var(--fc-river-60);
+  --slds-g-color-brand-base-65: #5eadaa;
+  --slds-g-color-brand-base-70: var(--fc-river-70);
+  --slds-g-color-brand-base-80: var(--fc-river-80);
+  --slds-g-color-brand-base-90: var(--fc-river-90);
+  --slds-g-color-brand-base-95: var(--fc-river-95);
+  --slds-g-color-border-brand-1: var(--fc-river-70);
+  --slds-g-color-border-brand-2: var(--fc-river-60);
+  --slds-g-link-color: var(--fc-link);
+  --slds-g-link-color-hover: var(--fc-link-hover);
+  --slds-g-link-color-focus: var(--fc-link-hover);
+  --slds-g-link-color-active: var(--fc-river-20);
+  --lwc-brandAccessible: var(--fc-river-50);
+  --lwc-brandAccessibleActive: var(--fc-river-30);
+  --lwc-brandPrimary: var(--fc-teal);
+  --lwc-brandPrimaryActive: var(--fc-river-40);
+  --lwc-colorBrand: var(--fc-river-60);
+  --lwc-colorBrandDark: var(--fc-river-50);
+  --lwc-colorBrandDarker: var(--fc-river-30);
+  --lwc-buttonColorBackgroundBrandPrimary: var(--fc-river-50);
+  --lwc-buttonColorBorderBrandPrimary: var(--fc-river-50);
+  --lwc-colorBackgroundBrandPrimary: var(--fc-river-50);
+  --lwc-colorBackgroundBrandPrimaryHover: var(--fc-river-30);
+  --lwc-colorBackgroundBrandPrimaryFocus: var(--fc-river-30);
+  --lwc-colorBackgroundBrandPrimaryActive: var(--fc-river-20);
+  --lwc-colorBackgroundButtonBrand: var(--fc-river-50);
+  --lwc-colorBackgroundButtonBrandHover: var(--fc-river-30);
+  --lwc-colorBackgroundButtonBrandActive: var(--fc-river-20);
+  --lwc-colorBorderButtonBrand: var(--fc-river-50);
+  --lwc-colorBorderBrand: var(--fc-river-60);
+  --lwc-colorBorderBrandDark: var(--fc-river-30);
+  --lwc-colorBorderBrandPrimary: var(--fc-river-60);
+  --lwc-colorBorderBrandPrimaryHover: var(--fc-river-50);
+  --lwc-colorBorderBrandPrimaryFocus: var(--fc-river-50);
+  --lwc-colorBorderBrandPrimaryActive: var(--fc-river-20);
+  --lwc-colorBorderTabSelected: var(--fc-river-50);
+  --lwc-colorStrokeBrand: var(--fc-river-50);
+  --lwc-colorStrokeBrandHover: var(--fc-river-50);
+  --lwc-colorStrokeBrandActive: var(--fc-river-20);
+  --lwc-colorBackgroundToggleActive: var(--fc-river-50);
+  --lwc-colorBackgroundToggleActiveHover: var(--fc-river-40);
+  --lwc-colorBackgroundInputCheckboxSelected: var(--fc-river-50);
+  --lwc-colorTextBrand: var(--fc-river-50);
+  --lwc-colorTextIconBrand: var(--fc-river-50);
+  --lwc-colorTextIconDefaultActive: var(--fc-river-20);
+  --lwc-colorTextButtonDefaultActive: var(--fc-river-50);
+  --lwc-colorTextTabLabelSelected: var(--fc-river-50);
+  --lwc-colorTextTabLabelFocus: var(--fc-river-30);
+  --lwc-colorTextTabLabelActive: var(--fc-river-20);
+  --lwc-brandTextLink: var(--fc-link);
+  --lwc-brandTextLinkActive: var(--fc-river-20);
+  --lwc-colorTextLink: var(--fc-link);
+  --lwc-colorTextLinkHover: var(--fc-link-hover);
+  --lwc-colorTextLinkFocus: var(--fc-link-hover);
+  --lwc-colorTextLinkActive: var(--fc-river-20);
+  --lwc-colorTextLinkPrimary: var(--fc-link);
+  --lwc-colorTextLinkPrimaryHover: var(--fc-link-hover);
+  --lwc-colorTextLinkPrimaryFocus: var(--fc-link-hover);
+  --lwc-colorTextLinkPrimaryActive: var(--fc-river-20);
+  --lwc-colorTextInputFocusInverse: var(--fc-river-20);
+
+  /* focus and selection */
+  --slds-g-shadow-outline-focus-1: 0 0 0 2px var(--fc-focus);
+  --slds-g-shadow-outset-focus-1: 0 0 0 2px #fff, 0 0 0 4px var(--fc-focus);
+  --slds-g-shadow-inset-focus-1:
+    0 0 0 2px #fff inset, 0 0 0 4px var(--fc-focus) inset;
+  --slds-g-shadow-inset-inverse-focus-1:
+    0 0 0 2px var(--fc-focus) inset, 0 0 0 4px #fff inset;
+  --lwc-shadowButtonFocus: 0 0 3px var(--fc-select);
+  --lwc-shadowActive: 0 0 2px var(--fc-select);
+  --lwc-shadowFocusInset: 0 0 2px 2px var(--fc-sky-60) inset;
+  --lwc-colorBorderInputActive: var(--fc-select);
+  --lwc-colorBorderRowSelected: var(--fc-select);
+  --lwc-colorBorderRowSelectedHover: var(--fc-sky-60);
+
+  /* status */
+  --slds-g-color-success-base-10: #011d06;
+  --slds-g-color-success-base-20: var(--fc-canopy-20);
+  --slds-g-color-success-base-30: var(--fc-canopy-30);
+  --slds-g-color-success-base-40: var(--fc-canopy-40);
+  --slds-g-color-success-base-50: var(--fc-canopy-50);
+  --slds-g-color-success-base-60: var(--fc-canopy-60);
+  --slds-g-color-success-base-70: var(--fc-canopy-70);
+  --slds-g-color-success-base-80: var(--fc-canopy-80);
+  --slds-g-color-success-base-90: var(--fc-canopy-90);
+  --slds-g-color-error-base-10: #380000;
+  --slds-g-color-error-base-20: var(--fc-macaw-20);
+  --slds-g-color-error-base-30: var(--fc-macaw-30);
+  --slds-g-color-error-base-40: var(--fc-macaw-40);
+  --slds-g-color-error-base-50: var(--fc-macaw-50);
+  --slds-g-color-error-base-60: var(--fc-macaw-60);
+  --slds-g-color-error-base-70: var(--fc-macaw-70);
+  --slds-g-color-error-base-80: var(--fc-macaw-80);
+  --slds-g-color-error-base-90: var(--fc-macaw-90);
+  --slds-g-color-warning-base-10: #221400;
+  --slds-g-color-warning-base-20: var(--fc-gold-20);
+  --slds-g-color-warning-base-30: var(--fc-gold-30);
+  --slds-g-color-warning-base-40: var(--fc-gold-40);
+  --slds-g-color-warning-base-50: var(--fc-gold-50);
+  --slds-g-color-warning-base-60: var(--fc-gold-60);
+  --slds-g-color-warning-base-70: var(--fc-gold-70);
+  --slds-g-color-warning-base-80: var(--fc-gold-80);
+  --slds-g-color-warning-base-90: var(--fc-gold-90);
+  --lwc-colorTextSuccess: var(--fc-canopy-50);
+  --lwc-colorBackgroundSuccess: var(--fc-canopy-70);
+  --lwc-colorBackgroundSuccessDark: var(--fc-canopy-50);
+  --lwc-colorBackgroundSuccessDarker: var(--fc-canopy-30);
+  --lwc-colorBorderSuccess: var(--fc-canopy-80);
+  --lwc-colorBorderSuccessDark: var(--fc-canopy-50);
+  --lwc-colorBackgroundButtonSuccess: var(--fc-canopy-70);
+  --lwc-colorBackgroundButtonSuccessHover: var(--fc-canopy-50);
+  --lwc-colorBackgroundButtonSuccessActive: var(--fc-canopy-50);
+  --lwc-colorBackgroundToastSuccess: var(--fc-canopy-50);
+  --lwc-colorBackgroundRowNew: var(--fc-canopy-90);
+  --lwc-colorTextError: var(--fc-macaw-50);
+  --lwc-colorTextDestructive: var(--fc-macaw-50);
+  --lwc-colorTextDestructiveHover: var(--fc-macaw-40);
+  --lwc-colorBorderError: var(--fc-macaw-50);
+  --lwc-colorBorderErrorAlt: var(--fc-macaw-70);
+  --lwc-colorBorderErrorDark: var(--fc-macaw-70);
+  --lwc-colorBorderDestructive: var(--fc-macaw-50);
+  --lwc-colorBorderDestructiveHover: var(--fc-macaw-40);
+  --lwc-colorBorderDestructiveActive: var(--fc-macaw-30);
+  --lwc-colorBackgroundError: var(--fc-macaw-60);
+  --lwc-colorBackgroundErrorAlt: var(--fc-macaw-70);
+  --lwc-colorBackgroundErrorDark: var(--fc-macaw-40);
+  --lwc-colorBackgroundInputError: var(--fc-macaw-90);
+  --lwc-colorBackgroundDestructive: var(--fc-macaw-40);
+  --lwc-colorBackgroundDestructiveHover: var(--fc-macaw-30);
+  --lwc-colorBackgroundDestructiveActive: var(--fc-macaw-30);
+  --lwc-colorBackgroundToastError: var(--fc-macaw-50);
+  --lwc-colorTextWarning: var(--fc-gold-70);
+  --lwc-colorTextWarningAlt: var(--fc-gold-40);
+  --lwc-colorBorderWarning: var(--fc-sun);
+  --lwc-colorBackgroundWarning: var(--fc-sun);
+  --lwc-colorBackgroundWarningDark: var(--fc-sun);
+
+  /* neutrals */
+  --slds-g-color-neutral-base-10: var(--fc-ink-10);
+  --slds-g-color-neutral-base-15: var(--fc-ink-15);
+  --slds-g-color-neutral-base-20: var(--fc-ink-20);
+  --slds-g-color-neutral-base-30: var(--fc-ink-30);
+  --slds-g-color-neutral-base-40: var(--fc-ink-40);
+  --slds-g-color-neutral-base-50: var(--fc-ink-50);
+  --slds-g-color-neutral-base-60: var(--fc-ink-60);
+  --slds-g-color-neutral-base-65: var(--fc-ink-65);
+  --slds-g-color-neutral-base-70: var(--fc-ink-70);
+  --slds-g-color-neutral-base-80: var(--fc-ink-80);
+  --slds-g-color-neutral-base-90: var(--fc-ink-90);
+  --slds-g-color-neutral-base-95: var(--fc-ink-95);
+  --slds-g-color-border-base-1: var(--fc-ink-80);
+  --slds-g-color-border-base-2: var(--fc-ink-70);
+  --slds-g-color-border-base-3: var(--fc-ink-60);
+  --slds-g-color-border-base-4: var(--fc-ink-50);
+  --lwc-colorTextDefault: var(--fc-ink-10);
+  --lwc-colorTextLabel: var(--fc-ink-30);
+  --lwc-colorTextWeak: var(--fc-ink-30);
+  --lwc-colorTextPlaceholder: var(--fc-ink-50);
+  --lwc-colorBorder: var(--fc-ink-90);
+  --lwc-colorBorderInput: var(--fc-ink-80);
+  --lwc-colorBorderInputDisabled: var(--fc-ink-80);
+  --lwc-colorBorderSeparator: var(--fc-ink-95);
+  --lwc-colorBorderSeparatorAlt: var(--fc-ink-90);
+  --lwc-colorBorderSeparatorAlt2: var(--fc-ink-80);
+  --lwc-colorBackground: var(--fc-ink-95);
+  --lwc-colorBackgroundAlt2: var(--fc-ink-95);
+  --lwc-colorBackgroundRowHover: var(--fc-ink-95);
+  --lwc-colorBackgroundRowActive: var(--fc-ink-95);
+  --lwc-colorBackgroundRowSelected: var(--fc-ink-95);
+  --lwc-colorBackgroundButtonDefaultActive: var(--fc-ink-95);
+  --lwc-colorBackgroundButtonDefaultFocus: var(--fc-ink-95);
+  --lwc-colorBackgroundButtonIconActive: var(--fc-ink-95);
+  --lwc-colorBackgroundButtonIconFocus: var(--fc-ink-95);
+  --lwc-colorBackgroundButtonBrandDisabled: var(--fc-ink-95);
+  --lwc-colorBackgroundToggle: var(--fc-ink-70);
+  --lwc-colorBackgroundToggleHover: var(--fc-ink-60);
+  --lwc-colorBackgroundToggleDisabled: var(--fc-ink-70);
+
+  /* SLDS 2 (the Cosmos theme) colours base components through semantic
+     hooks instead of the ramps above: accent is the brand, on-surface the
+     text, surface and border the neutrals. */
+  --slds-g-color-accent-1: var(--fc-river-50);
+  --slds-g-color-accent-2: var(--fc-river-40);
+  --slds-g-color-accent-3: var(--fc-river-30);
+  --slds-g-color-accent-container-1: var(--fc-river-50);
+  --slds-g-color-accent-container-2: var(--fc-river-40);
+  --slds-g-color-accent-container-3: var(--fc-river-30);
+  --slds-g-color-border-accent-1: var(--fc-river-50);
+  --slds-g-color-border-accent-2: var(--fc-river-40);
+  --slds-g-color-border-accent-3: var(--fc-river-30);
+  --slds-g-color-on-accent-1: #fff;
+  --slds-g-color-on-accent-2: #fff;
+  --slds-g-color-on-surface-1: var(--fc-ink-40);
+  --slds-g-color-on-surface-2: var(--fc-ink-20);
+  --slds-g-color-on-surface-3: var(--fc-deep);
+  --slds-g-color-surface-2: var(--fc-ink-95);
+  --slds-g-color-surface-3: var(--fc-ink-95);
+  --slds-g-color-surface-container-2: var(--fc-ink-95);
+  --slds-g-color-surface-container-3: var(--fc-ink-90);
+  --slds-g-color-surface-container-inverse-1: var(--fc-deep);
+  --slds-g-color-border-1: var(--fc-ink-80);
+  --slds-g-color-border-2: var(--fc-ink-40);
+  --slds-g-color-error-1: var(--fc-macaw-40);
+  --slds-g-color-on-error-1: var(--fc-macaw-40);
+  --slds-g-color-border-error-1: var(--fc-macaw-40);
+  --slds-g-color-error-container-1: var(--fc-macaw-95);
+  --slds-g-color-error-container-2: var(--fc-macaw-90);
+  --slds-g-color-success-1: var(--fc-canopy-40);
+  --slds-g-color-on-success-1: var(--fc-canopy-40);
+  --slds-g-color-on-success-2: var(--fc-canopy-30);
+  --slds-g-color-success-container-1: var(--fc-canopy-95);
+  --slds-g-color-success-container-2: var(--fc-canopy-90);
+  --slds-g-color-warning-1: var(--fc-gold-40);
+  --slds-g-color-on-warning-1: var(--fc-gold-40);
+  --slds-g-color-warning-container-1: var(--fc-gold-95);
+  --slds-g-color-info-1: var(--fc-sky-40);
+  --slds-g-color-on-info-1: var(--fc-sky-40);
+  --slds-g-color-info-container-1: var(--fc-sky-95);
+  --slds-g-color-disabled-1: var(--fc-ink-50);
+  --slds-g-color-on-disabled-1: var(--fc-ink-50);
+  --slds-g-color-border-disabled-1: var(--fc-ink-50);
+  --slds-g-color-disabled-container-1: var(--fc-ink-90);
+  --slds-g-color-disabled-container-2: var(--fc-ink-80);
+
+  /* SLDS 2's component-level system hooks are declared on the page root as
+     var(--slds-g-…), so they resolve to Salesforce blue there and inherit
+     already resolved. Declared again here they resolve against the hooks
+     above. Focus rings stay the macaw-blue focus colour. */
+  --slds-s-button-color: var(--slds-g-color-accent-2);
+  --slds-s-button-color-hover: var(--slds-g-color-on-surface-3);
+  --slds-s-button-color-background-hover: var(--slds-g-color-brand-base-90);
+  --slds-s-button-color-background-active: var(
+    --slds-g-color-surface-container-2
+  );
+  --slds-s-button-color-background-focus: var(
+    --slds-g-color-surface-container-2
+  );
+  --slds-s-button-color-border: var(--slds-g-color-border-2);
+  --slds-s-button-brand-shadow-hover: 0 2px 0 0 var(--fc-river-20);
+  --slds-s-button-bordered-shadow-hover: 0 1.5px 0 0 var(--fc-ink-20);
+  --slds-s-button-shadow-focus:
+    0 0 0 2px var(--slds-g-color-surface-1), 0 0 0 4px var(--fc-focus);
+  --slds-s-button-shadow-focus-inverse:
+    0 0 0 2px var(--fc-focus), 0 0 0 4px var(--slds-g-color-surface-1);
+  --slds-s-container-color: var(--slds-g-color-on-surface-1);
+  --slds-s-container-content-color: var(--slds-g-color-on-surface-1);
+  --slds-s-container-footer-font-color: var(--slds-g-color-on-surface-2);
+  --slds-s-container-heading-font-color: var(--slds-g-color-on-surface-3);
+  --slds-s-helptext-color: var(--slds-g-color-on-surface-1);
+  --slds-s-icon-color-foreground: var(--slds-g-color-on-surface-1);
+  --slds-s-input-color: var(--slds-g-color-on-surface-2);
+  --slds-s-input-color-border: var(--slds-g-color-border-2);
+  --slds-s-input-color-border-focus: var(--slds-g-color-border-2);
+  --slds-s-input-color-border-disabled: var(--slds-g-color-border-disabled-1);
+  --slds-s-input-color-background-disabled: var(
+    --slds-g-color-disabled-container-1
+  );
+  --slds-s-input-color-background-invalid: var(
+    --slds-g-color-error-container-1
+  );
+  --slds-s-input-color-disabled: var(--slds-g-color-on-disabled-1);
+  --slds-s-input-color-invalid: var(--slds-g-color-error-1);
+  --slds-s-label-color: var(--slds-g-color-on-surface-2);
+  --slds-s-link-color: var(--slds-g-color-accent-2);
+  --slds-s-link-color-hover: var(--slds-g-color-accent-3);
+  --slds-s-link-color-focus: var(--slds-g-color-accent-3);
+  --slds-s-link-color-active: var(--slds-g-color-accent-3);
+  --slds-s-link-outline-color: var(--fc-focus);
+  --slds-s-mark-color-background-checked: var(
+    --slds-g-color-accent-container-1
+  );
+  --slds-s-mark-color-foreground-checked: var(--slds-g-color-on-accent-1);
+  --slds-s-mark-color-background-invalid: var(--slds-g-color-error-base-40);
+  --slds-s-mark-shadow-focus:
+    0 0 0 2px var(--slds-g-color-surface-1), 0 0 0 4px var(--fc-focus);
+  --slds-s-menu-item-color-active: var(--slds-g-color-accent-1);
+  --slds-s-menu-item-color-background-active: var(--slds-g-color-brand-base-90);
+  --slds-s-navigation-color: var(--slds-g-color-on-surface-1);
+  --slds-s-navigation-color-active: var(--slds-g-color-accent-3);
+  --slds-s-navigation-color-hover: var(--slds-g-color-brand-base-15);
+  --slds-s-navigation-color-background-hover: var(--slds-g-color-brand-base-90);
+  --slds-s-navigation-color-border: var(--slds-g-color-border-1);
+  --slds-s-navigation-color-border-hover: var(--slds-g-color-brand-base-15);
+  --slds-s-pageheader-color-background: var(--slds-g-color-surface-container-2);
+  --slds-s-pageheader-row-color-background: var(
+    --slds-g-color-surface-container-2
+  );
+  --slds-s-pill-color-background-hover: var(--slds-g-color-brand-base-90);
+  --slds-s-table-color: var(--slds-g-color-on-surface-1);
+  --slds-s-table-header-color: var(--slds-g-color-on-surface-1);
+  --slds-s-table-header-color-background: var(
+    --slds-g-color-surface-container-2
+  );
+  --slds-s-table-header-color-background-hover: var(
+    --slds-g-color-surface-container-3
+  );
+  --slds-s-table-resize-color: var(--slds-g-color-border-1);
+  --slds-s-table-resize-color-active: var(--slds-g-color-accent-3);
+  --slds-s-table-row-color-background-selected: var(
+    --slds-g-color-brand-base-90
+  );
+  --slds-s-table-row-color-border-selected-hover: var(
+    --slds-g-color-border-accent-2
+  );
+  --slds-s-table-cell-shadow-selected: var(--fc-focus) 0 0 0 2px inset;
+}

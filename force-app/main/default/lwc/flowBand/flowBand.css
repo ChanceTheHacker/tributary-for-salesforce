@@ -1,0 +1,45 @@
+/*
+ * The page header as a band of the trailer's river at dusk: jungle into
+ * deep river, cream type and a sunlit-gold edge like the trailer's tapes.
+ * Imported, after c/flowTokens, by the four pages, each of which puts it
+ * in a <header class="header"> at the top of a card padded by 1rem.
+ */
+.header {
+  margin: -1rem -1rem 0;
+  padding: 0.875rem 1rem 0.875rem 1.375rem;
+  border-radius: 0.25rem 0.25rem 0 0;
+  background: linear-gradient(
+    100deg,
+    var(--fc-jungle) 0%,
+    var(--fc-deep) 65%,
+    var(--fc-river-30) 100%
+  );
+  box-shadow: inset 6px 0 0 var(--fc-sun);
+  /* Help in cream and the main action in gold. Text colours are set one by
+     one below: a colour on the band itself would reach into the fields. */
+  --fc-help-color: var(--fc-cream);
+  --slds-c-button-brand-color-background: var(--fc-sun);
+  --slds-c-button-brand-color-border: var(--fc-sun);
+  --slds-c-button-brand-text-color: var(--fc-jungle);
+  --slds-c-button-brand-color-background-hover: var(--fc-gold-80);
+  --slds-c-button-brand-color-border-hover: var(--fc-gold-80);
+  --slds-c-button-brand-text-color-hover: var(--fc-jungle);
+  --slds-c-button-brand-color-background-active: var(--fc-gold-70);
+  --slds-c-button-brand-color-border-active: var(--fc-gold-70);
+  --slds-c-button-brand-text-color-active: var(--fc-jungle);
+}
+
+.header h1 {
+  color: var(--fc-cream);
+}
+
+.header .subtitle,
+.header .meta {
+  color: var(--fc-river-80);
+}
+
+/* The page's icon on a river-teal tile. */
+.header .title > lightning-icon {
+  --slds-c-icon-color-background: var(--fc-teal);
+  --slds-c-icon-color-foreground: var(--fc-cream);
+}

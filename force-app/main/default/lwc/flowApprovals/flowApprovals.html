@@ -1,0 +1,302 @@
+<template>
+  <div class={pageClass}>
+    <template lwc:if={fullPage}>
+      <header class="header">
+        <div class="title">
+          <lightning-icon
+            icon-name="standard:approval"
+            size="medium"
+            alternative-text=""
+          ></lightning-icon>
+          <div>
+            <h1>Flow Approvals</h1>
+            <p class="subtitle">
+              Requests to make a flow version live. After approving, keep the
+              page open until it says the version is active.
+            </p>
+          </div>
+        </div>
+        <div class="filters">
+          <!-- Visible beside the box; the combobox carries the same label for assistive tech. -->
+          <span class="filter-label" aria-hidden="true">Status</span>
+          <lightning-combobox
+            class="status"
+            label="Status"
+            variant="label-hidden"
+            options={statusOptions}
+            value={status}
+            onchange={handleStatus}
+          ></lightning-combobox>
+          <lightning-button-icon
+            icon-name="utility:refresh"
+            variant="border-filled"
+            alternative-text="Refresh"
+            title="Refresh"
+            onclick={handleRefresh}
+          ></lightning-button-icon>
+          <c-flow-help topic="approve"></c-flow-help>
+          <c-flow-help-toggle></c-flow-help-toggle>
+        </div>
+      </header>
+
+      <div class="tabs" role="tablist" aria-label="Request views">
+        <template for:each={scopes} for:item="item">
+          <button
+            key={item.value}
+            class={item.className}
+            role="tab"
+            id={item.id}
+            tabindex={item.tabIndex}
+            aria-controls="request-results"
+            onkeydown={handleScopeKey}
+            aria-selected={item.selected}
+            data-scope={item.value}
+            onclick={handleScope}
+          >
+            {item.label}
+          </button>
+        </template>
+      </div>
+    </template>
+    <template lwc:else>
+      <div class="request-head">
+        <h2>Activation request</h2>
+        <lightning-button-icon
+          icon-name="utility:refresh"
+          alternative-text="Refresh request"
+          onclick={handleRefresh}
+        ></lightning-button-icon>
+      </div>
+    </template>
+
+    <template lwc:if={comparisonWarning}>
+      <p class="meta" role="status">{comparisonWarning}</p>
+    </template>
+    <div class="decision-result" role="status" aria-atomic="true">
+      <template lwc:if={lastDecision}>
+        <p><strong>{lastDecision.title}.</strong> {lastDecision.message}</p>
+      </template>
+    </div>
+
+    <template lwc:if={error}>
+      <p class="error" role="alert">{error}</p>
+    </template>
+    <template lwc:if={linkedError}>
+      <p class="error linked-error" role="alert">{linkedError}</p>
+    </template>
+
+    <div
+      id="request-results"
+      role={resultsRole}
+      aria-label="Activation requests"
+      tabindex="0"
+      aria-labelledby={selectedTabId}
+      class={resultsClass}
+      aria-busy={resultsBusy}
+    >
+      <template lwc:if={loading}>
+        <div class="loading">
+          <lightning-spinner
+            alternative-text="Loading requests"
+            size="small"
+          ></lightning-spinner>
+        </div>
+      </template>
+
+      <template lwc:if={hasRows}>
+        <ul class="requests">
+          <template for:each={rows} for:item="row">
+            <li key={row.id} class={row.className} aria-hidden={row.hidden}>
+              <div class="request-head">
+                <h2 class="request-title">{row.title}</h2>
+                <span class={row.badgeClass}>{row.statusText}</span>
+              </div>
+              <template lwc:if={row.linkedText}>
+                <p class="meta linked">{row.linkedText}</p>
+              </template>
+              <p class="meta">
+                {row.requestedText}
+                <template lwc:if={row.connectionText}>
+                  <span> · {row.connectionText}</span>
+                </template>
+                <template lwc:if={row.approverText}>
+                  <span> · {row.approverText}</span>
+                </template>
+              </p>
+              <template lwc:if={row.comments}>
+                <blockquote class="comments">{row.comments}</blockquote>
+              </template>
+              <template lwc:if={row.changeSummary}>
+                <p class="change">{row.changeSummary}</p>
+              </template>
+              <template lwc:if={row.replacesText}>
+                <p class="meta replaces">{row.replacesText}</p>
+              </template>
+              <template lwc:if={row.decided}>
+                <p class="meta">{row.decided}</p>
+              </template>
+              <template lwc:if={row.decisionComments}>
+                <blockquote class="comments">{row.decisionComments}</blockquote>
+              </template>
+              <template lwc:if={row.error}>
+                <p class="error">{row.error}</p>
+              </template>
+              <template lwc:if={row.truncated}>
+                <lightning-button
+                  class="show-full"
+                  variant="base"
+                  label="Show the full text"
+                  data-id={row.id}
+                  onclick={handleShowFull}
+                ></lightning-button>
+              </template>
+              <div class="actions">
+                <lightning-button
+                  class="compare"
+                  label="Compare"
+                  title={row.compareTitle}
+                  aria-label={row.compareText}
+                  data-id={row.id}
+                  onclick={handleCompare}
+                ></lightning-button>
+                <template lwc:if={row.compareReplacedText}>
+                  <lightning-button
+                    class="compare-replaced"
+                    label={row.compareReplacedText}
+                    data-id={row.id}
+                    onclick={handleCompareReplaced}
+                  ></lightning-button>
+                </template>
+                <!-- Ending actions sit apart on the right, with approving last. -->
+                <div class="decide">
+                  <template lwc:if={row.canCancel}>
+                    <lightning-button
+                      class="cancel"
+                      variant="destructive-text"
+                      label="Withdraw"
+                      data-id={row.id}
+                      data-action="cancel"
+                      onclick={handleAction}
+                    ></lightning-button>
+                  </template>
+                  <template lwc:if={row.canDecide}>
+                    <lightning-button
+                      class="reject"
+                      label="Reject"
+                      data-id={row.id}
+                      data-action="reject"
+                      onclick={handleAction}
+                    ></lightning-button>
+                    <lightning-button
+                      class="approve"
+                      variant={row.approveVariant}
+                      label={row.approveLabel}
+                      data-id={row.id}
+                      data-action="approve"
+                      onclick={handleAction}
+                    ></lightning-button>
+                  </template>
+                </div>
+              </div>
+            </li>
+          </template>
+        </ul>
+      </template>
+
+      <template lwc:if={showEmpty}>
+        <div class="empty">
+          <lightning-icon
+            class={empty.iconClass}
+            icon-name={empty.icon}
+            size="small"
+            alternative-text=""
+          ></lightning-icon>
+          <p class="empty-text">{empty.text}</p>
+          <template lwc:if={empty.showAll}>
+            <lightning-button
+              class="show-all"
+              label="Show all statuses"
+              onclick={handleShowAll}
+            ></lightning-button>
+          </template>
+          <template lwc:if={empty.openCompare}>
+            <lightning-button
+              class="open-compare"
+              variant="brand"
+              label="Compare flows"
+              onclick={handleOpenCompare}
+            ></lightning-button>
+          </template>
+        </div>
+      </template>
+
+      <template lwc:if={hasMore}>
+        <div class="more">
+          <lightning-button
+            class="show-more"
+            label={moreLabel}
+            disabled={loadingMore}
+            onclick={handleMore}
+          ></lightning-button>
+        </div>
+      </template>
+    </div>
+
+    <template lwc:if={dialogOpen}>
+      <span class="focus-guard" tabindex="0" onfocus={handleFocusLast}></span>
+      <section
+        class="slds-modal slds-fade-in-open"
+        role="dialog"
+        tabindex="-1"
+        aria-modal="true"
+        aria-labelledby="decision-title"
+        onkeydown={handleDialogKey}
+      >
+        <div class="slds-modal__container">
+          <header class="slds-modal__header">
+            <h2 id="decision-title" class="slds-modal__title">
+              {dialog.title}
+            </h2>
+          </header>
+          <div class="slds-modal__content slds-p-around_medium">
+            <p class="dialog-text">{dialogText}</p>
+            <template lwc:if={dialogHasComments}>
+              <lightning-textarea
+                class="dialog-comments"
+                label={dialog.comments}
+                value={dialogComments}
+                max-length="32000"
+                onchange={handleComments}
+              ></lightning-textarea>
+            </template>
+            <template lwc:if={working}
+              ><p role="status">
+                Saving your decision. Activation may wait in the queue; keep
+                this page open for the result.
+              </p></template
+            >
+            <template lwc:if={dialogError}>
+              <p class="error" role="alert">{dialogError}</p>
+            </template>
+          </div>
+          <footer class="slds-modal__footer">
+            <lightning-button
+              label="Back"
+              disabled={working}
+              onclick={handleDialogClose}
+            ></lightning-button>
+            <lightning-button
+              class="confirm slds-m-left_x-small"
+              variant={dialog.variant}
+              label={dialog.button}
+              disabled={working}
+              onclick={handleConfirm}
+            ></lightning-button>
+          </footer>
+        </div>
+      </section>
+      <span class="focus-guard" tabindex="0" onfocus={handleFocusFirst}></span>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+  </div>
+</template>
